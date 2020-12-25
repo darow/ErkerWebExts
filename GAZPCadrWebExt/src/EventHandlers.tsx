@@ -79,29 +79,28 @@ export async function getStaffDepManager(urlResolver: UrlResolver, requestManage
     return requestManager.get(url);
 }
 
-export async function fillAgreementAndBookKeepers(sender) {
-    // console.log('start')
-    let folderControl = sender.layout.controls.folder
-    // console.log(folderControl)
-    // let folderP = folderControl.params
-    // console.log(folderP)
-    // let folderVal = folderControl.params.value
-    // console.log(folderVal)
-    let folderID = folderControl.params.value.id
-    // console.log(folderID)
-
+export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) {
+    console.log("fillAgreementAndBookKeepers")
+    let hash = window.location.hash
+    console.log(hash)
+    let splitHash = hash.split('/')
+    console.log(splitHash)
+    let splitIdHash = splitHash[4].split("?")
+    console.log(splitIdHash)
+    let idFolder = splitIdHash[0]
+    console.log(idFolder)
     let controls = sender.layout.controls
-    let headerText = controls.headerLabel.props.text;
+    let cardKind = controls.cardKind1.params.value.cardKindName
 
     let urlResolver = sender.layout.getService($UrlResolver);
     let requestManager = sender.layout.getService($RequestManager);
 
-    await getAgreementPersonsAndBookKeepers(urlResolver, requestManager, folderID)
+    await getAgreementPersonsAndBookKeepers(urlResolver, requestManager, idFolder)
         .then((data: string) => {
             if (data['staffDepartment']) {
                 controls.staffDepartment.value = data["staffDepartment"]
             }
-            if (headerText == "Приказ по благотворительности") {
+            if (cardKind == "Приказ по благотворительности") {
                 if (data['charityOrderMainBookKeeper']) {
                     controls.mainBookKeeper.value = data["charityOrderMainBookKeeper"]
                 }
@@ -114,7 +113,7 @@ export async function fillAgreementAndBookKeepers(sender) {
                 if (data['charityOrderAgreementEmployees']) {
                     controls.agreementPersons.value = data['charityOrderAgreementEmployees']
                 }
-            } else if (headerText == "Лист согласования кандиадата") {
+            } else if (cardKind == "Лист согласования кандиадата") {
                 if (data['candidateAgreementCPKBoss']) {
                     controls.CPKChief.value = data['candidateAgreementCPKBoss']
                 }
@@ -124,7 +123,7 @@ export async function fillAgreementAndBookKeepers(sender) {
                 if (data['candidateAgreementAgreementEmployees']) {
                     controls.agreementEmployees.value = data['candidateAgreementAgreementEmployees']
                 }
-            } else if (headerText == 'Карточка документов при приеме') {
+            } else if (cardKind == 'Карточка документов при приеме') {
                 if (data['recruitmentDocsOUandOTOClerk']) {
                     controls.OUandOTOClerk.value = data['recruitmentDocsOUandOTOClerk']
                 }
@@ -140,7 +139,7 @@ export async function fillAgreementAndBookKeepers(sender) {
                 if (data['recruitmentDocsAgreementEmployees2']) {
                     controls.coordinatingPersons1.value = data['recruitmentDocsAgreementEmployees2']
                 }
-            } else if (headerText == "Приказ на выплату") {
+            } else if (cardKind == "Приказ на выплату") {
                 if (data['payOrderMainBookKeeper']) {
                     controls.mainBookKeeper.value = data['payOrderMainBookKeeper']
                 }
@@ -181,7 +180,6 @@ export async function postRequest(urlResolver: UrlResolver, requestManager: IReq
     let postdata = {
         idList: ["df4d5173-a3f6-483c-bdcf-c14a1c1fb068", "cba42eca-bf18-4702-93b8-29390937020a", "b6da23af-d66b-485b-a04a-9a096d975e0e"],
         stateName: "AddedToOrder"
-        // "AddedToOrder" "Drafting"
     }
     return requestManager.post(url, JSON.stringify(postdata));
 }
@@ -248,4 +246,14 @@ export function UpdateCandidateFIO(sender: Layout, e: IEventArgs) {
         FIO += candiadatePatronymicControl.params.value;
     }
     candiadateFIOControl.params.value = FIO;
+}
+
+export async function hideCreateButton(sender: Layout, e: IEventArgs) {
+    console.log(window.location.hash)
+    if ((window.location.hash.includes('#/Dashboard')) || (window.location.hash.includes('#/Folder/e9572bcb-' +
+        'c590-4624-9005-9b657812ba1f?Color=folder-default'))) {
+        $('.new-card').css('display', 'none')
+    } else {
+        $('.new-card').css('display', 'inline-block')
+    }
 }
