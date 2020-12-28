@@ -122,10 +122,19 @@ export async function PrepDoc(urlResolver, requestManager, unitId, timestamp) {
 
 export async function hideReconciliation(sender: Layout, e: IEventArgs) {
     console.log("hideReconciliation");
+    let approvalMessageControl =  sender.layout.controls.approvalMessage
+
+    let linkValue = sender.layout.controls.link.params.value
+    if (!linkValue) {
+        $('.decision-to-approval').attr("disabled")
+        $('.decision-to-approval').css("background", "grey")
+        approvalMessageControl.params.visibility = true
+        console.log("sender.layout.controls.link.params.value == null!!!!")
+    }
+
+    let CardID = sender.layout.controls.link.params.value.cardId
     let urlResolver = sender.layout.getService($UrlResolver);
     let requestManager = sender.layout.getService($RequestManager);
-    let CardID = sender.layout.controls.link.params.value.cardId
-    let approvalMessageControl =  sender.layout.controls.approvalMessage
     await CheckState(urlResolver, requestManager, CardID)
         .then(function (data) {
             console.log(data);
