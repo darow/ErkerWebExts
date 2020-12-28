@@ -1,7 +1,241 @@
 ﻿.text-red {
-    color: red;
+  color: red;
 }
 
-.button-hover-blue-shadow>button:hover {
-    box-shadow: 0 0 20px rgba(0,32,225,0.5);;
+.button-hover-blue-shadow > button:hover {
+  box-shadow: 0 0 20px rgba(0, 32, 225, 0.5);;
+}
+
+//from VK prew vers
+
+.file-icon-cell {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  -webkit-box-flex: 1;
+  flex: 1 1 0%;
+  border-bottom: 1px solid #ddd;
+  padding: 0 4px;
+  border-left: none;
+  width: calc(55px);
+  flex-basis: calc(55px);
+  min-width: calc(55px);
+  max-width: calc(55px);
+}
+
+.file-icon {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  background: 0 0;
+  margin: 0;
+  padding: 0;
+  margin-left: 19px;
+  margin-right: 5px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.file-name-cell {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  -webkit-box-flex: 1;
+  flex: 1 1 0%;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 0 4px;
+  width: calc((75% - 55px) - 15px);
+  flex-basis: calc((75% - 55px) - 15px);
+  min-width: calc((75% - 55px) - 15px);
+  max-width: calc((75% - 55px) - 15px);
+}
+
+.file-name {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  padding: 0;
+  padding-left: 5px;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.file-version-cell {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  -webkit-box-flex: 1;
+  flex: 1 1 0%;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 0 4px;
+  text-align: center;
+  width: calc(25% - 15px);
+  flex-basis: calc(25% - 15px);
+  min-width: calc(25% - 15px);
+  max-width: calc(25% - 15px);
+}
+
+.file-version-cell > a {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  cursor: pointer;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #00558b;
+  text-decoration: none;
+  line-height: inherit;
+}
+
+.file-version {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: center;
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  cursor: pointer;
+  max-width: 100%;
+  color: #00558b;
+  text-decoration: none;
+  line-height: inherit;
+  display: inline-block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-settings-cell {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  text-align: left;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  -webkit-box-flex: 1;
+  flex: 1 1 0%;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #ddd;
+  display: block;
+  padding: 0;
+  width: 30px;
+  flex-basis: 30px;
+  min-width: 30px;
+  max-width: 30px;
+}
+
+.file-settings {
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Roboto";
+  color: #222;
+  font-weight: 400;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -webkit-box-direction: normal;
+  line-height: 50px;
+  box-sizing: inherit;
+  border: 0;
+  outline: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  background: 0 0;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  text-align: center;
 }

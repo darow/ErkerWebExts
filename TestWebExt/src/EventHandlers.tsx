@@ -197,3 +197,17 @@ export async function hideCreateButtonNew(sender: Layout, e: IEventArgs) {
     }
 }
 
+export async function addClassesToFileControl(sender:Layout, e:IEventArgs) {
+    console.log("addClassesToFileControl()")
+    let cellsElems = document.querySelectorAll('.file-table-body div.table-helper-cell')
+    for (let i = 0; i<cellsElems.length/4; i++) {
+        cellsElems[i*4].classList.add("file-icon-cell")
+        cellsElems[i*4].children[0].classList.add("file-icon")
+        cellsElems[i*4+1].classList.add("file-name-cell")
+        cellsElems[i*4+1].children[0].classList.add("file-version")
+        cellsElems[i*4+2].classList.add("file-version-cell")
+        cellsElems[i*4+2].children[0].classList.add("file-version")
+        cellsElems[i*4+3].classList.add("file-settings-cell")
+        cellsElems[i*4+3].children[0].classList.add("file-settings")
+    }
+}
