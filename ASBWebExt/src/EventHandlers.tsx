@@ -21,16 +21,16 @@ export async function savePartner(sender: Layout, e: IEventArgs) {
                         console.log(data)
                     })
                     .catch((ex) => {
-                        MessageBox.ShowError("Контрагент не сохранен! ", ex);
+                        MessageBox.ShowError( ex,"Контрагент не сохранен! ");
                     })
             }
         })
 }
 
 export async function savePartnerRequest(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp, partnerCardId) {
-    let url = urlResolver.resolveApiUrl("savePartner", "partnerService")
+    let url = urlResolver.resolveApiUrl("SavePartner", "PartnerService")
     let postdata = {
-        partnerCardId: partnerCardId,
+        docId: partnerCardId,
         timestamp: timestamp
     }
     return requestManager.post(url, JSON.stringify(postdata))

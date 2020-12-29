@@ -123,28 +123,31 @@ export async function PrepDoc(urlResolver, requestManager, unitId, timestamp) {
 export async function hideReconciliation(sender: Layout, e: IEventArgs) {
     console.log("hideReconciliation");
     let approvalMessageControl =  sender.layout.controls.approvalMessage
-
     let linkValue = sender.layout.controls.link.params.value
+
     if (!linkValue) {
-        $('.decision-to-approval').attr("disabled")
+        $('.decision-to-approval').attr("disabled", "true")
+        $('.decision-to-approval').text("На согласование")
         $('.decision-to-approval').css("background", "grey")
+
         approvalMessageControl.params.visibility = true
         console.log("sender.layout.controls.link.params.value == null!!!!")
     }
 
-    let CardID = sender.layout.controls.link.params.value.cardId
+    let CardID = linkValue.cardId
     let urlResolver = sender.layout.getService($UrlResolver);
     let requestManager = sender.layout.getService($RequestManager);
     await CheckState(urlResolver, requestManager, CardID)
         .then(function (data) {
             console.log(data);
             if (data) {
-                $('.decision-to-approval').attr("disabled", "false")
+                $('.decision-to-approval').removeAttr("disabled")
                 $('.decision-to-approval').css("background", "rgba(0,149,218,.8)")
                 approvalMessageControl.params.visibility = false
                 // $('.decision-to-approval').removeClass("showHidden")
             } else {
-                $('.decision-to-approval').attr("disabled")
+                $('.decision-to-approval').attr("disabled", "true")
+                $('.decision-to-approval').text("На согласование")
                 $('.decision-to-approval').css("background", "grey")
                 approvalMessageControl.params.visibility = true
                 // $('.decision-to-approval').addClass("showHidden")
