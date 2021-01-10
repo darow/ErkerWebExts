@@ -1,3 +1,13 @@
-﻿div.template {
-    color: red;
+﻿.fw-val-bold>div>div>div:last-child {
+    font-weight: bold !important;
+}
+
+.table-content-center>div>div>div>div>.table-row-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon {
+    content: "\1F441";
 }
