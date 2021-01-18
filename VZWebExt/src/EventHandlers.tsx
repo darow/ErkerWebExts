@@ -103,8 +103,8 @@ export async function prepareDocument(sender: Layout, e: IEventArgs) {
     let timestamp = sender.layout.cardInfo.timestamp
     let urlResolver = sender.layout.getService($UrlResolver);
     let requestManager = sender.layout.getService($RequestManager);
-    let id = "ecf6ac08-96c9-4d87-b349-137e38a6950f";
-    await PrepDoc(urlResolver, requestManager, id, timestamp)
+    let cardId = sender.layout.cardInfo.id
+    await PrepDoc(urlResolver, requestManager, cardId, timestamp)
         .then(function (data) {
             console.log(data["infoMessage"]);
         })
@@ -198,4 +198,6 @@ export async function fakeCheckState(urlResolver, requestManager, CardID) {
     url += "?CardID=" + "225a366e-50c6-4ef3-9830-f171862517ed";
     return requestManager.get(url)
 }
+
+
 

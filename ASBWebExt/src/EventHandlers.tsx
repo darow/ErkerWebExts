@@ -8,26 +8,139 @@ import { $Router, $RouterNavigation, IRouterNavigation } from "@docsvision/webcl
 import { layoutManager } from "@docsvision/webclient/System/LayoutManager";
 import { LayoutControl } from "@docsvision/webclient/System/BaseControl";
 import { LayoutControlFactory } from "@docsvision/webclient/System/LayoutControlFactory";
+import { CancelableEventArgs } from "@docsvision/webclient/System/CancelableEventArgs";
+import moment from 'moment'
+
+
+export async function changeLogo(sender:Layout, e: IEventArgs) {
+    $('#company-logo').addClass('hidden-bef')
+    $('#company-logo').append(`<div class="company-logo-img"></div>`)
+    
+}
+
+
+export async function rewriteStyle () {
+    $('.label-cell_align-top').removeAttr('style')
+}
+
+
+// Флаг "Не резидент" меняет видимость и обязательность некоторых полей
+export async function setNotResOrgFormVis(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("setOrgFormVis")
+    
+    let notResidentFlag = sender.layout.controls.notResidentFlag
+    let notResOrganizationForm = sender.layout.controls.notResOrganizationForm
+    let country = sender.layout.controls.country
+    let TIN = sender.layout.controls.TIN
+    let INN = sender.layout.controls.INN
+ 
+    if (notResidentFlag.params.value) {
+        notResOrganizationForm.params.visibility = true
+        country.params.visibility = true
+        TIN.params.visibility = true
+        INN.params.required = false
+    } else {
+        notResOrganizationForm.params.visibility = false
+        country.params.visibility = false
+        TIN.params.visibility = false
+        INN.params.required = true
+    }
+}
+
+
+export async function changeStateToArchive(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("changeStateToArchive")
+
+
+    let stateId = sender.layout.controls.state.params.value.stateId.toUpperCase() 
+    const toArchiveTransitionId = "D0DAD72C-E7C2-4BC3-B816-667C48AFC9EE"
+    const createdStateId = "32EC920B-9263-492B-81A0-3F4BF50F7E4B".toUpperCase()
+    const isApprovedStateId = "72ADF2C6-239B-49BE-B0AF-49A8E580EBC1".toUpperCase()
+
+    console.log("((stateId == draftingStateId) || (stateId == isApprovedStateId))",
+     ((stateId == createdStateId) ||  (stateId == isApprovedStateId)))
+    if (stateId == createdStateId || stateId == isApprovedStateId) {
+        await sender.layout.changeState(toArchiveTransitionId)
+        location.reload()
+    } else {
+        console.log('you cant archive from this state!')
+    }
+}
+
+
+export async function createFile(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("createFile")
+
+    let cardId = sender.layout.cardInfo.id
+    let urlResolver = sender.layout.getService($UrlResolver);
+    let requestManager = sender.layout.getService($RequestManager);
+    let res = await createFileRequest(urlResolver, requestManager, cardId)
+    location.reload()
+    
+}
 
 
 
-// export async function checkLoadTree(sender) {
-//     console.log("checkLoadTree")
-//     let urlResolver = sender.layout.getService($UrlResolver);
-//     let requestManager = sender.layout.getService($RequestManager);
+export async function createFileRequest(urlResolver: UrlResolver,
+    requestManager: IRequestManager, docId: String) {
+    let url = urlResolver.resolveUrl("FillOutgoingDocumentWordFile", "FillTemplates", false);
+    console.log(url);
+    url += "?documentId=" + docId;
+    return requestManager.get(url)
+}
 
-//     await loadPartnersDepsTree(urlResolver, requestManager)
-//         .then((data: string) => {
-//             console.log(data)
-//             let depsArray = data["items"]
-//             depsArray.array.forEach(element => {
-                
-//             }); 
-//         })
-//         .catch((ex) => {
-//             console.log(ex)
-//         })
-// }
+
+export async function registerORD(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("registerORD")
+
+    let stateId = sender.layout.controls.state.params.value.stateId.toUpperCase()
+    const draftingStateId = "bfc5eff9-8a46-4edb-b821-5be2b9cb69d8".toUpperCase()
+    const isApprovedStateId = "8D7E3866-9908-4B52-95E4-6801B6A2D201".toUpperCase()
+    const registrateOperation = "72A89008-4EA0-448D-9BA9-9F6181DACD3D"
+    let regDate = sender.layout.controls.regDate
+    let numerator = sender.layout.controls.numerator
+
+    console.log("((stateId == draftingStateId) || (stateId == isApprovedStateId))",
+     ((stateId == draftingStateId) ||  (stateId == isApprovedStateId)))
+
+    if (stateId == draftingStateId || stateId == isApprovedStateId) {
+        await numerator.generateNewNumber()
+        await sender.layout.changeState(registrateOperation)
+        regDate.params.value = moment()
+        regDate.save()
+        setTimeout(() => { console.log("World!"); }, 3000);
+        location.reload()
+    } else {
+        console.log('cant register from this state!')
+    }
+}
+
+
+export async function registerOutCome(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("registerOutCome")
+
+    let numerator = sender.layout.controls.regNum;
+    let stateId = sender.layout.controls.state.params.value.stateId 
+    const draftingStateId = "AAE1C071-82E9-4D4B-9219-9F172BF0B071"
+    const isApprovedStateId = "5CF670C9-6EAE-40A2-974E-ADF269720177"
+    let regDate = sender.layout.controls.regDate
+
+    // console.log(typeof(numerator.params.value.number))
+    console.log("(numerator.value.number == null)", (numerator.value.number == null))
+    console.log("((stateId == draftingStateId) || (stateId == isApprovedStateId))",
+     ((stateId == draftingStateId) ||  (stateId == isApprovedStateId)))
+
+    if ((numerator.value.number == null)&&((stateId.toUpperCase() == draftingStateId.toUpperCase()) ||
+     (stateId.toUpperCase() == isApprovedStateId.toUpperCase()))) {
+        await sender.layout.changeState("A5875A98-12A7-4EB2-A581-4FF7912B32BB")
+        await numerator.generateNewNumber();
+        regDate.params.value = moment()
+        regDate.save()
+        location.reload()
+    } else {
+        console.log('wrong state now or number already exist!')
+    }
+}
 
 
 export async function loadPartnersDepsTree(urlResolver: UrlResolver, requestManager: IRequestManager) {
@@ -69,62 +182,6 @@ export async function fillPartnersDep(sender: Layout, e: IEventArgs) {
             
     }
 }
-
-
-
-// export function findDep(deps: [], depId: string) {
-//     console.log("findDep")
-//     for (let i = 0; i < deps.length; i++) {
-//         console.log(deps[i]["data"]["id"], "==", depId);
-//         console.log(deps[i]["data"]["id"] == depId);
-
-//         if (deps[i]["data"]["id"] == depId) {
-//             return deps[i]["data"]
-//         }       
-//     }
-//     console.log("findDep was Failed!")
-//     return null
-// }
-
-
-// export async function fillPartnersDepOld(sender: Layout, e: IEventArgs) {
-//     console.log("fillPartnersDep")
-
-//     let numRows = sender.layout.controls.personsTable.rows.length
-//     let partnersEmplId = sender.layout.controls.get("recieverEmployee")
-//     let partnerDepartments = sender.layout.controls.get("partnerDepartment")
-//     let urlResolver = sender.layout.getService($UrlResolver)
-//     let requestManager = sender.layout.getService($RequestManager)
-
-
-//     let partnersDepsModels
-//     await loadPartnersDepsTree(urlResolver, requestManager)
-//         .then((data: string) => {
-//             console.log(data)
-//             partnersDepsModels = data["items"]
-//         })
-//         .catch((ex) => {
-//             console.log(ex)
-//         })
-//     console.log("models = ", partnersDepsModels);
-    
-//     for (let i = 0; i < numRows; i++) {
-//         partnerDepartments[i].params.value = null
-
-//         console.log("partnerEmplId=", partnersEmplId[i].params.value.id);
-        
-//         await getPartnerDepId(urlResolver, requestManager, partnersEmplId[i].params.value.id)
-//             .then((data) => {
-//                 console.log("depId=",data);
-//                 partnerDepartments[i].params.value = findDep(partnersDepsModels,
-//                      String(data))
-//             })
-//             .catch((ex) => {
-//                 MessageBox.ShowError(ex, "Подразделение получателя не заполнено.");
-//             })
-            
-//     }
-// }
 
 
 export async function getPartnerDepId(urlResolver: UrlResolver,

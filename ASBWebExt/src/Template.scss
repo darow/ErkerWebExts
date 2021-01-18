@@ -1,13 +1,42 @@
-﻿.fw-val-bold>div>div>div:last-child {
+﻿//  fw-val-bold Жирный шрифт значений контролов в просмотре
+.fw-val-bold>div>div>div:last-child {
     font-weight: bold !important;
 }
 
+
+// Выравнивание в таблицах
 .table-content-center>div>div>div>div>.table-row-cell {
     display: flex ;
     justify-content: center ;
     align-items: center ;
 }
 
-.icon {
-    content: "\1F441";
+// сделать кнопку голубой
+.blue-button>button {
+    background-color: rgba(0,149,218,.8);
+    color:whitesmoke;
+}
+
+.blue-button>button:hover {
+    background-color: #0095da;
+}
+
+
+// разфиксировать размер меток контролов
+.label-cell_align-top {
+    width:auto !important;
+}
+
+
+// changeLogo
+.hidden-bef::before {
+    display: none !important;
+}
+
+.company-logo-img {
+    margin-top: 10px;
+    background: url(http://edo.atombroker.ru:81/DocsvisionWebClient/Content/App/Assets/Images/asb25.png) no-repeat;
+    background-size: 350px 50px;
+    width: 750px;
+    height: 100%;
 }
