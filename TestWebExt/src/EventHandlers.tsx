@@ -8,6 +8,9 @@ import {UrlResolver} from "@docsvision/webclient/System/UrlResolver"
 import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$RequestManager"
 import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox"
 
+
+
+
 // Все функции, классы и переменные используемые за пределами модуля (т.е. файла)
 // должны экспортироваться (содержать ключевое слово export в объявлении).
 export async function prepareDocument(sender: Layout, e: IEventArgs) {
@@ -32,8 +35,8 @@ export async function logPostRequest(sender) {
     let urlResolver = sender.layout.getService($UrlResolver)
     let requestManager = sender.layout.getService($RequestManager)
     let timestamp = sender.layout.cardInfo.timestamp
-
-    await postRequest(urlResolver, requestManager, timestamp)
+    let cardId = sender.layout.cardInfo.id
+    await postRequest(urlResolver, requestManager, timestamp, cardId)
         .then((data: string) => {
             console.log(data)
         })
@@ -42,10 +45,10 @@ export async function logPostRequest(sender) {
         })
 }
 
-export async function postRequest(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp) {
+export async function postRequest(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp, cardId) {
     let url = urlResolver.resolveApiUrl("PrepareDocumentByTaskId", "DocumentProcessService")
     let postdata = {
-        taskId: "3672de1e-c6eb-42f1-a2fb-2be218a1d748",
+        taskId: cardId,
         timestamp: timestamp
     }
     return requestManager.post(url, JSON.stringify(postdata))

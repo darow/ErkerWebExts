@@ -248,10 +248,40 @@ export function UpdateCandidateFIO(sender: Layout, e: IEventArgs) {
     candiadateFIOControl.params.value = FIO;
 }
 
+
+
 export async function hideCreateButton(sender: Layout, e: IEventArgs) {
-    console.log(window.location.hash)
-    if ((window.location.hash.includes('#/Dashboard')) || (window.location.hash.includes('#/Folder/e9572bcb-' +
-        'c590-4624-9005-9b657812ba1f?Color=folder-default'))) {
+    console.log("hideCreateButton")
+    
+    const foldersWithoutCreateButton = { "Главная":"/Dashboard",
+        "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
+        "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
+        "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
+        "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
+        "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
+        "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
+        "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
+        "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
+        "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
+        "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
+        "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
+        "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
+        "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
+        "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
+        "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
+        "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
+        "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
+        "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
+    }
+
+    let currentLocation = window.location.href
+
+    function isSliceOfCurrentLocation(element, index, array) {
+
+        return currentLocation.includes(element)
+      }
+    
+    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)) {
         $('.new-card').css('display', 'none')
     } else {
         $('.new-card').css('display', 'inline-block')

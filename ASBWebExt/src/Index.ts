@@ -1,5 +1,6 @@
 ﻿import * as EventHandlers from "./EventHandlers";
 import { extensionManager } from "@docsvision/webclient/System/ExtensionManager";
+import {ILocalizationsMap} from "@docsvision/webclient/System/ILocalizationsMap";
 
 
 // Главная входная точка всего расширения
@@ -11,5 +12,20 @@ import { extensionManager } from "@docsvision/webclient/System/ExtensionManager"
 extensionManager.registerExtension({
     name: "Template web extension",
     version: "5.5.14",
-    globalEventHandlers: [ EventHandlers ]
+    globalEventHandlers: [ EventHandlers ],
+    getLocalizations: getLocalizations
 })
+
+function getLocalizations(): ILocalizationsMap {
+    let cultureMap = {};
+    cultureMap["ru"] = {
+        "AgreementList_Caption": "{1}",
+        "AgreementList_CaptionNoNumber": "{0}"
+    };
+    cultureMap["en"] = {
+        "AgreementList_Caption": "{1}",
+        "AgreementList_CaptionNoNumber": "{0}"
+
+    };
+    return cultureMap;
+}

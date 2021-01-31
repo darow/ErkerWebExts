@@ -10,9 +10,193 @@ import { LayoutControl } from "@docsvision/webclient/System/BaseControl";
 import { LayoutControlFactory } from "@docsvision/webclient/System/LayoutControlFactory";
 import { CancelableEventArgs } from "@docsvision/webclient/System/CancelableEventArgs";
 import moment from 'moment'
+import {$CurrentEmployee} from "@docsvision/webclient/StandardServices";
+﻿import {AgreementList} from "@docsvision/webclient/Approval/AgreementList";
+import {Numerator, NumeratorParams} from "@docsvision/webclient/BackOffice/Numerator";
+
+
+export async function hidePartnerEmployeeTableId(sender:Layout, e:IEventArgs) {
+    console.log("hidePartnerEmployeeTableId");
+    $( "div[data-tipso-text*='ID сотрудника']" ).attr("style", "display: none !important;")
+}
+
+
+
+export async function prepFillAgreement(sender: AgreementList) {
+    console.log("prepFillAgreement");
+    
+    let cardId = sender.layout.cardInfo.id;
+    let urlResolver = sender.layout.getService($UrlResolver);
+    let requestManager = sender.layout.getService($RequestManager);
+    let agreementList = sender.layout.controls.agreementList;
+    let docTypeControl = sender.layout.controls.directoryDesignerRow2
+    let docType = docTypeControl == undefined ? sender.layout.controls.cardKind1.params.value.cardKindName:
+        (docTypeControl.params.value == null)? "":docTypeControl.params.value.name;
+    let numControl = sender.layout.controls.regNumber
+    let num = (numControl.params.value) == null ? "":numControl.params.value.number
+    let dateOfRegistration = sender.layout.controls.dateTimePicker11;
+    let initiatorControl = sender.layout.controls.employee1    
+    let didgestControl = sender.layout.controls.textBox3
+    let holdingUnit = sender.layout.controls.directoryDesignerRow1;
+
+    layoutManager.cardLayout.controls.agreementList.params.agreementReportOpening.subscribe(async (handler, args) => {
+
+        args.data.model.documentName = `${docType} № ${num} от
+        ${moment(dateOfRegistration.params.value).format('L')}. Инициатор:
+         ${initiatorControl.params.value.displayName}`
+    });
+
+
+    agreementList.params.agreementReportOpened.subscribe(async (handler, args) => {
+        console.log("agreementReportOpened");
+        let showOnHovRows = document.querySelectorAll('.show-on-hover')
+        showOnHovRows.forEach(element => {
+            element.classList.remove("show-on-hover")
+        });
+        let tableItem = document.querySelectorAll('.system-agreement-list-content>div:last-child')
+        tableItem[0].setAttribute("style", "font-size:80%;")
+        
+        let contentControl = args.contentControl;
+        console.log(contentControl);
+        args.contentControl.columns.splice(1, 5);
+        let columns = contentControl.columns;
+        
+        // columns[0].class += " hidden"
+        // columns[1].class += " hidden"
+        // columns[0].visibility = false
+        // columns[1].visibility = false
+        // columns[2].visibility = false
+        // columns[3].visibility = false
+        // columns[4].visibility = false
+        // columns[5].visibility = false
+        
+        // columns[0].hidden = true
+        // columns[1].hidden = true;
+        // columns[2].hidden = true;
+        // columns[3].hidden = true;
+        // columns[4].hidden = true;
+        // columns[5].hidden = true;
+        // console.log(columns[5])
+        let index = args.contentControl.columns.indexOf(args.contentControl.commentColumn);
+        columns.push({
+            name: "ФИО согласующего",
+            wieght: 1,
+            value: (item) => item.fio,
+            class: 'fio'
+        }, {
+            name: "Дата начала",
+            wieght: 1,
+            value: (item) => item.beginDate,
+            class: 'beginDate'
+        }, {
+            name: "Дата завершения",
+            wieght: 1,
+            value: (item) => item.endDate,
+            class: 'endDate'
+        }, {
+            name: "Принятое решение",
+            wieght: 1,
+            value: (item) => item.decision,
+            class: 'decision'
+        }, {
+            name: "Комментарии",
+            wieght: 1,
+            value: (item) => item.comment,
+            class: 'comments'
+        });
+
+
+        let receivedFromSererItems = await getAgreement(urlResolver, requestManager, cardId);
+        let ObjectMas = receivedFromSererItems['items']
+
+        args.model.items = ObjectMas.map(serverItem => (
+
+            {
+
+                fio: serverItem['fio'],
+                beginDate: moment(serverItem['beginDate']).format('DD.MM.YYYY HH:mm'),
+                endDate: moment(serverItem['endDate']).isValid() ? moment(serverItem['endDate']).format('DD.MM.YYYY HH:mm') : '',
+                decision: serverItem['decision'],
+                comment: serverItem['comment']
+
+            }));
+
+        
+
+        args.contentControl.forceUpdate();
+        let cellsElems = document.querySelectorAll('.table-helper-cell')
+        cellsElems.forEach(element => {
+            element.classList.add("text-center")
+        });
+        console.log(columns)
+
+    });
+}
+
+
+export async function getAgreement(urlResolver: UrlResolver, requestManager: IRequestManager, cardId: String) {
+    let url = urlResolver.resolveUrl("GetReconciliationList", "Reconciliation");
+    url += "?documentId=" + cardId;
+    return requestManager.get(url);
+}
+
+
+
+export async function addProfileTableClasses(sender:Layout, e:IEventArgs) {
+    console.log("addProfileTableClasses()")
+    let cellsElems = document.querySelectorAll('.table-helper-cell')
+    console.log(cellsElems)
+    for (let i = 0; i<cellsElems.length/3; i++) {
+        console.log("cycle")
+        cellsElems[i*3].classList.add("file-icon-cell")
+        // cellsElems[i*4].children[0].classList.add("file-icon")
+        cellsElems[i*3+1].classList.add("checkbox-input-cell")
+        cellsElems[i*3+1].children[0].classList.add("checkbox-input")
+        cellsElems[i*3+2].classList.add("rubbish-cell")
+    }
+}
+
+
+export async function addClassesToFileControl(sender:Layout, e:IEventArgs) {
+    console.log("addClassesToFileControl()")
+    let cellsElems = document.querySelectorAll('.file-table-body div.table-helper-cell')
+    console.log(cellsElems)
+    for (let i = 0; i<cellsElems.length/4; i++) {
+        console.log("cycle")
+        cellsElems[i*4].classList.add("file-icon-cell")
+        cellsElems[i*4].children[0].classList.add("file-icon")
+        cellsElems[i*4+1].classList.add("file-name-cell")
+        cellsElems[i*4+1].children[0].classList.add("file-version")
+        cellsElems[i*4+2].classList.add("file-version-cell")
+        cellsElems[i*4+2].children[0].classList.add("file-version")
+        cellsElems[i*4+3].classList.add("file-settings-cell")
+        cellsElems[i*4+3].children[0].classList.add("file-settings")
+    }
+}
+
+
+export async function cancel(sender: Layout) {
+    console.log("cancel")
+    window.history.back();
+}
+
+
+export async function changeLastAuthorAndSave(sender: Layout) {
+    console.log("changeLastAuthorAndSave")
+    let lastAuthorControl = sender.layout.controls.lastChangeAuthor
+    let CurrentUser = sender.layout.getService($CurrentEmployee)
+    lastAuthorControl.params.value = CurrentUser
+    // await lastAuthorControl.save()
+    await layoutManager.cardLayout.save()
+    let viewUrl = window.location.href.replace("CardEdit", "CardView") 
+    window.location.href = viewUrl;
+    console.log("success")
+}
+
 
 
 export async function changeLogo(sender:Layout, e: IEventArgs) {
+    console.log("changeLogo")
     $('#company-logo').addClass('hidden-bef')
     $('#company-logo').append(`<div class="company-logo-img"></div>`)
     
@@ -20,6 +204,7 @@ export async function changeLogo(sender:Layout, e: IEventArgs) {
 
 
 export async function rewriteStyle () {
+    console.log("rewriteStyle")   
     $('.label-cell_align-top').removeAttr('style')
 }
 
@@ -104,42 +289,46 @@ export async function registerORD(sender: Layout, args: CancelableEventArgs<any>
      ((stateId == draftingStateId) ||  (stateId == isApprovedStateId)))
 
     if (stateId == draftingStateId || stateId == isApprovedStateId) {
-        await numerator.generateNewNumber()
-        await sender.layout.changeState(registrateOperation)
+        if (numerator.value.number == null) {
+            await numerator.generateNewNumber()
+        }
         regDate.params.value = moment()
-        regDate.save()
-        setTimeout(() => { console.log("World!"); }, 3000);
-        location.reload()
+        await regDate.save()
+        await sender.layout.changeState(registrateOperation)
     } else {
         console.log('cant register from this state!')
+        return
     }
+    location.reload()
 }
 
 
 export async function registerOutCome(sender: Layout, args: CancelableEventArgs<any>) {
     console.log("registerOutCome")
 
-    let numerator = sender.layout.controls.regNum;
+    let numerator = sender.layout.controls.regNumber;
     let stateId = sender.layout.controls.state.params.value.stateId 
     const draftingStateId = "AAE1C071-82E9-4D4B-9219-9F172BF0B071"
     const isApprovedStateId = "5CF670C9-6EAE-40A2-974E-ADF269720177"
-    let regDate = sender.layout.controls.regDate
+    let regDate = sender.layout.controls.dateTimePicker11
 
-    // console.log(typeof(numerator.params.value.number))
-    console.log("(numerator.value.number == null)", (numerator.value.number == null))
+    // console.log("(numerator.value.number == null)", (numerator.value.number == null))
     console.log("((stateId == draftingStateId) || (stateId == isApprovedStateId))",
      ((stateId == draftingStateId) ||  (stateId == isApprovedStateId)))
 
-    if ((numerator.value.number == null)&&((stateId.toUpperCase() == draftingStateId.toUpperCase()) ||
-     (stateId.toUpperCase() == isApprovedStateId.toUpperCase()))) {
-        await sender.layout.changeState("A5875A98-12A7-4EB2-A581-4FF7912B32BB")
-        await numerator.generateNewNumber();
+    if ((stateId.toUpperCase() == draftingStateId.toUpperCase()) ||
+     (stateId.toUpperCase() == isApprovedStateId.toUpperCase())) {
+        if (numerator.value.number == null) {
+            await numerator.generateNewNumber()
+        }
         regDate.params.value = moment()
-        regDate.save()
-        location.reload()
+        await regDate.save()
+        await sender.layout.changeState("A5875A98-12A7-4EB2-A581-4FF7912B32BB")       
     } else {
         console.log('wrong state now or number already exist!')
+        return
     }
+    location.reload()
 }
 
 

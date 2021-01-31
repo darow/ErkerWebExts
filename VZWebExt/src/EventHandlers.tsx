@@ -1,8 +1,10 @@
 ﻿import {IEventArgs} from "@docsvision/webclient/System/IEventArgs";
 import {Layout} from "@docsvision/webclient/System/Layout";
 import {$UrlResolver} from "@docsvision/webclient/System/$UrlResolver";
-import {$RequestManager} from "@docsvision/webclient/System/$RequestManager";
+import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$RequestManager";
 import {layoutManager} from "@docsvision/webclient/System/LayoutManager";
+import { UrlResolver } from "@docsvision/webclient/System/UrlResolver";
+
 
 async function getFromDadata(INN) {
     let xhr = new XMLHttpRequest() //Создаем и открываем запрос
@@ -98,26 +100,54 @@ export async function fillTheControls(sender: Layout, e: IEventArgs, respJSON) {
     }
 }
 
-export async function prepareDocument(sender: Layout, e: IEventArgs) {
-    console.log("prepareDocument");
+
+
+
+export async function preapareDocument(sender) {
+    let urlResolver = sender.layout.getService($UrlResolver)
+    let requestManager = sender.layout.getService($RequestManager)
     let timestamp = sender.layout.cardInfo.timestamp
-    let urlResolver = sender.layout.getService($UrlResolver);
-    let requestManager = sender.layout.getService($RequestManager);
     let cardId = sender.layout.cardInfo.id
-    await PrepDoc(urlResolver, requestManager, cardId, timestamp)
-        .then(function (data) {
-            console.log(data["infoMessage"]);
+    await prepareDocByTaskId(urlResolver, requestManager, timestamp, cardId)
+        .then((data: string) => {
+            console.log(data)
+            location.reload()
         })
         .catch((ex) => {
             console.log(ex)
         })
 }
 
-export async function PrepDoc(urlResolver, requestManager, unitId, timestamp) {
-    let url = urlResolver.resolveApiUrl("PrepareDocumentByTaskId", "DocumentProcessService");
-    url += "?id=" + unitId;
-    return requestManager.get(url)
+export async function prepareDocByTaskId(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp, cardId) {
+    let url = urlResolver.resolveApiUrl("PrepareDocumentByTaskId", "DocumentProcessService")
+    let postdata = {
+        taskId: cardId,
+        timestamp: timestamp
+    }
+    return requestManager.post(url, JSON.stringify(postdata))
 }
+
+
+// export async function prepareDocument(sender: Layout, e: IEventArgs) {
+//     console.log("prepareDocument");
+//     let timestamp = sender.layout.cardInfo.timestamp
+//     let urlResolver = sender.layout.getService($UrlResolver);
+//     let requestManager = sender.layout.getService($RequestManager);
+//     let cardId = sender.layout.cardInfo.id
+//     await PrepDoc(urlResolver, requestManager, cardId, timestamp)
+//         .then(function (data) {
+//             console.log(data["infoMessage"]);
+//         })
+//         .catch((ex) => {
+//             console.log(ex)
+//         })
+// }
+
+// export async function PrepDoc(urlResolver, requestManager, unitId, timestamp) {
+//     let url = urlResolver.resolveApiUrl("PrepareDocumentByTaskId", "DocumentProcessService");
+//     url += "?id=" + unitId;
+//     return requestManager.get(url)
+// }
 
 
 export async function hideReconciliation(sender: Layout, e: IEventArgs) {
