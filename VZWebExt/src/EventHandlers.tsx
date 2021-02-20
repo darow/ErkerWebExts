@@ -4,6 +4,94 @@ import {$UrlResolver} from "@docsvision/webclient/System/$UrlResolver";
 import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$RequestManager";
 import {layoutManager} from "@docsvision/webclient/System/LayoutManager";
 import { UrlResolver } from "@docsvision/webclient/System/UrlResolver";
+import moment from 'moment'
+
+
+export async function getTrustedInfo(urlResolver: UrlResolver, requestManager: IRequestManager, emplID: String) {
+    let url = urlResolver.resolveApiUrl("GetVZEmplModels", "VZService");
+    url += "?emplID=" + emplID;
+    return requestManager.get(url);
+}
+
+
+export async function fillTrustedInfo(sender:Layout, e:IEventArgs) {
+    console.log("fillTrustedInfo");
+    
+    let doveritelControl = sender.layout.controls.Doveritel
+    let doveritelId = doveritelControl.params.value ? doveritelControl.params.value.id:""
+    let urlResolver = sender.layout.getService($UrlResolver);
+    let requestManager = sender.layout.getService($RequestManager);
+
+    let contractNumControl = sender.layout.controls.textArea1
+    let contractDateControl = sender.layout.controls.dateTimePicker1
+    let employeeLastNameControl = sender.layout.controls.EmployeeLastName
+    let employeeFirstNameControl = sender.layout.controls.EmployeeFirstName
+    let employeeMiddleNameControl = sender.layout.controls.EmployeeMiddleName
+    let employeeBirthdayDateControl = sender.layout.controls.EmployeeBirthdayDate
+    let employeeCityBirthdayContract = sender.layout.controls.EmployeeCityBirthday
+    let employeePassportSeriesControl = sender.layout.controls.EmployeePassportSeries
+    let employeePassportNumberControl = sender.layout.controls.EmployeePassportNumber
+    let employeePassportDeliveredControl = sender.layout.controls.EmployeePassportDelivered
+    let employeePassportDeliveryCodeControl = sender.layout.controls.EmployeePassportDeliveryCode
+    let employeePassportDateControl = sender.layout.controls.EmployeePassportDate
+
+    if (doveritelId != "") {
+        let data = await getTrustedInfo(urlResolver, requestManager, doveritelId)
+        console.log(data);
+        
+        if (data["emplContractNum"]) {
+            contractNumControl.params.value = data["emplContractNum"]
+        }
+        if (data["emplContractDate"]) {
+            contractDateControl.params.value = moment(data["emplContractDate"])
+        }
+
+        if (data["lastName"]) {
+            employeeLastNameControl.params.value = data["lastName"]
+        }
+        if (data["firstName"]) {
+            employeeFirstNameControl.params.value = data["firstName"]
+        }
+        if (data["middleName"]) {
+            employeeMiddleNameControl.params.value = data["middleName"]
+        }
+        if (data["birthDate"]) {
+            employeeBirthdayDateControl.params.value = moment(data["birthDate"])
+        }
+        if (data["birthPlace"]) {
+            employeeCityBirthdayContract.params.value = data["birthPlace"]
+        }
+
+        if (data["docS"]) {
+            employeePassportSeriesControl.params.value = data["docS"]
+        }
+        if (data["docNumber"]) {
+            employeePassportNumberControl.params.value = data["docNumber"]
+        }
+        if (data["docBy"]) {
+            employeePassportDeliveredControl.params.value = data["docBy"]
+        }
+        if (data["depCode"]) {
+            employeePassportDeliveryCodeControl.params.value = data["depCode"]
+        }
+        if (data["docDate"]) {
+            employeePassportDateControl.params.value = moment(data["docDate"])
+        }
+    } else {
+        contractNumControl.params.value = null
+        contractDateControl.params.value = null
+        employeeLastNameControl.params.value = null
+        employeeFirstNameControl.params.value = null
+        employeeMiddleNameControl.params.value = null
+        employeeBirthdayDateControl.params.value = null
+        employeeCityBirthdayContract.params.value = null
+        employeePassportSeriesControl.params.value = null
+        employeePassportNumberControl.params.value = null
+        employeePassportDeliveredControl.params.value = null
+        employeePassportDeliveryCodeControl.params.value = null
+        employeePassportDateControl.params.value = null
+    }
+}
 
 
 async function getFromDadata(INN) {
