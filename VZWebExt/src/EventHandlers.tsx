@@ -5,6 +5,121 @@ import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$Re
 import {layoutManager} from "@docsvision/webclient/System/LayoutManager";
 import { UrlResolver } from "@docsvision/webclient/System/UrlResolver";
 import moment from 'moment'
+import { Tab } from "@docsvision/webclient/Platform/Tab";
+import { ICancelableEventArgs } from "@docsvision/webclient/System/ICancelableEventArgs";
+
+
+export async function newFunc(sender:Layout) {
+    console.log("newFunc");
+
+
+}
+
+
+export async function createFileRows(sender:Layout) {
+    console.log("createFileRows");
+
+    let fileTable = sender.layout.controls.fileTable
+    await fileTable.addRow();
+    await fileTable.addRow();
+    await fileTable.addRow();
+    let fileLabels = sender.layout.controls.fileLabel
+    fileLabels[0].value =  "Устав"
+    fileLabels[1].value =  "Свидетельство"
+    fileLabels[2].value =  "Паспорт"
+}
+
+
+export async function crtRmSignerFileRow(sender:Layout) {
+    console.log("crtRmSignerFileRow");
+
+    let fileTable = sender.layout.controls.fileTable
+    let mainBossIsSigner = sender.layout.controls.mainBossIsSigner.value
+    if (mainBossIsSigner) {
+        if (fileTable.rows.length == 3) {
+            await fileTable.addRow();
+            sender.layout.controls.fileLabel[3].value = "Доверенность подписанта" 
+        } 
+    } else {
+        if (fileTable.rows.length == 4) {
+            await fileTable.removeRow(fileTable.rows[3]);
+        } 
+    }
+    
+}
+
+
+export async function setPartnerSigner(sender:Layout) {
+    console.log("setPartnerSigner");
+
+    let mainBossIsSigner = sender.layout.controls.mainBossIsSigner.value
+    let mainBossBlock = sender.layout.controls.mainBossBlock
+    let partnerSignerControl = sender.layout.controls.partnerSigner
+    let mainBossControl = sender.layout.controls.mainBoss
+
+
+    if (mainBossIsSigner) {
+        partnerSignerControl.params.required = false
+        partnerSignerControl.params.visibility = false
+        mainBossBlock.params.width = 100
+    } else {
+        partnerSignerControl.params.required = true
+        partnerSignerControl.params.visibility = true
+        mainBossBlock.params.width = 50
+    }
+    
+}
+
+
+export async function getCheckList(urlResolver: UrlResolver, requestManager: IRequestManager, itemID: String) {
+    let url = urlResolver.resolveApiUrl("GetCheckList", "VZService");
+    url += "?itemID=" + itemID;
+    return requestManager.get(url);
+}
+
+
+export async function fillCheckListTable(sender:Layout) {
+    console.log("fillCheckListTable");
+   
+    let tab = sender.layout.controls.get<Tab>("tabs"); 
+    let myTab = tab.params.tabPages[1]; 
+    let tabpageModel = await tab.loadTabPage(myTab);
+
+    let checkListTable = sender.layout.controls.checkListTable
+
+    let checkBoxes = sender.layout.controls.CLTCheckBox
+    let isCheckedFlag = false
+    if (checkBoxes) {
+        checkBoxes.forEach(chBox => {
+            if (chBox.params.value) {
+                isCheckedFlag = true
+            }             
+        });
+    }
+    
+
+    if (!isCheckedFlag) {
+        while (checkListTable.rows.length>0) {
+            await checkListTable.removeRow(checkListTable.rows[0])
+        }
+
+        let categoryControlValue = sender.layout.controls.partnerCategory.params.value
+        let categoryId = categoryControlValue?categoryControlValue.id:""
+        let urlResolver = sender.layout.getService($UrlResolver);
+        let requestManager = sender.layout.getService($RequestManager);
+        let response = await getCheckList(urlResolver, requestManager, categoryId)
+        let items = response["docName"]
+        
+        while (checkListTable.rows.length<items.length) {
+            await checkListTable.addRow()
+        }
+        let tableDirDesRows
+        for (let i = 0; i < items.length; i++) {
+            tableDirDesRows = sender.layout.controls.get("CLTDirDesRow")    
+            tableDirDesRows[i].params.value = items[i]
+        }
+    }
+}
 
 
 export async function getTrustedInfo(urlResolver: UrlResolver, requestManager: IRequestManager, emplID: String) {
@@ -22,6 +137,7 @@ export async function fillTrustedInfo(sender:Layout, e:IEventArgs) {
     let urlResolver = sender.layout.getService($UrlResolver);
     let requestManager = sender.layout.getService($RequestManager);
 
+    let trustedEmplPost = sender.layout.controls.EmployeeDolznost
     let contractNumControl = sender.layout.controls.textArea1
     let contractDateControl = sender.layout.controls.dateTimePicker1
     let employeeLastNameControl = sender.layout.controls.EmployeeLastName
@@ -77,6 +193,9 @@ export async function fillTrustedInfo(sender:Layout, e:IEventArgs) {
         if (data["docDate"]) {
             employeePassportDateControl.params.value = moment(data["docDate"])
         }
+        if (data["position"]) {
+            trustedEmplPost.value = data["position"]
+        }
     } else {
         contractNumControl.params.value = null
         contractDateControl.params.value = null
@@ -90,6 +209,7 @@ export async function fillTrustedInfo(sender:Layout, e:IEventArgs) {
         employeePassportDeliveredControl.params.value = null
         employeePassportDeliveryCodeControl.params.value = null
         employeePassportDateControl.params.value = null
+        trustedEmplPost.value = null
     }
 }
 
@@ -194,9 +314,12 @@ export async function fillTheControls(sender: Layout, e: IEventArgs, respJSON) {
 export async function preapareDocument(sender) {
     let urlResolver = sender.layout.getService($UrlResolver)
     let requestManager = sender.layout.getService($RequestManager)
-    let timestamp = sender.layout.cardInfo.timestamp
     let cardId = sender.layout.cardInfo.id
-    await prepareDocByTaskId(urlResolver, requestManager, timestamp, cardId)
+    let rDate = moment(sender.layout.controls.regDate.params.value).format('DD.MM.YYYY')
+    await sender.layout.saveCard()
+    let timestamp = sender.layout.cardInfo.timestamp
+
+    await prepareDocByTaskId(urlResolver, requestManager, timestamp, cardId, rDate)
         .then((data: string) => {
             console.log(data)
             location.reload()
@@ -206,11 +329,12 @@ export async function preapareDocument(sender) {
         })
 }
 
-export async function prepareDocByTaskId(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp, cardId) {
+export async function prepareDocByTaskId(urlResolver: UrlResolver, requestManager: IRequestManager, timestamp, cardId, rDate) {
     let url = urlResolver.resolveApiUrl("PrepareDocumentByTaskId", "DocumentProcessService")
     let postdata = {
         taskId: cardId,
-        timestamp: timestamp
+        timestamp: timestamp,
+        rDate: rDate
     }
     return requestManager.post(url, JSON.stringify(postdata))
 }

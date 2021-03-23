@@ -9,6 +9,47 @@ import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$Re
 import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox"
 
 
+export async function callTable(sender: Layout) {
+    console.log("callTable")
+
+
+    window.open(
+        "http://localhost:8002/?operation=circleDiagram&done=123&outTerm=321&changedDate=502",
+        '_blank'
+      );
+
+    // let urlResolver = sender.layout.getService($UrlResolver)
+    // let requestManager = sender.layout.getService($RequestManager)
+
+    // await getTable(urlResolver, requestManager)
+    //             .then((data: string) => {
+    //                            console.log(data)
+    //             })
+}
+
+
+
+export async function getTable(urlResolver: UrlResolver, requestManager: IRequestManager) {
+    let url = "http://localhost:8002/?operation=circleDiagram&done=123&outTerm=321&changedDate=502"
+
+    return requestManager.get(url)
+}
+
+
+export async function pythTest(sender: Layout) {
+    console.log("pythTest")
+    const spawn = require("child_process").spawn;
+    const pythonProcess = spawn('python',["/script1.py", "arg1", "arg2"]);
+    pythonProcess.stdout.on('data', (data) => {
+        console.log(data)
+    });
+}
+
+export async function pythTestt(sender: Layout) {
+    console.log("pythTestt")
+    
+}
+
 
 
 // Все функции, классы и переменные используемые за пределами модуля (т.е. файла)

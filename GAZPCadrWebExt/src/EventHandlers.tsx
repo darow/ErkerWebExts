@@ -7,6 +7,82 @@ import {$UrlResolver} from "@docsvision/webclient/System/$UrlResolver";
 import {UrlResolver} from "@docsvision/webclient/System/UrlResolver";
 import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$RequestManager";
 import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox";
+import { TextArea } from "@docsvision/webclient/Platform/TextArea";
+import { $Router } from "@docsvision/webclient/System/$Router";
+
+
+export async function createNewOrder(sender){
+    console.log("createNewOrder");
+
+    let inputs = document.getElementsByTagName('input')
+    let tr = document.getElementsByClassName('system-grid-data-row')
+    let trueArray = []
+    let arrayIds = []
+
+    for(let i=0; i<inputs.length; i++){
+            if(inputs[i].classList.length == 0 && inputs[i].id != 'search-context-option'){
+                    trueArray.push(inputs[i])
+            }
+    }
+
+    console.log(trueArray)
+    trueArray.splice(0, 1);
+    console.log(trueArray)
+    for(let i=0; i<trueArray.length; i++){
+
+        if(trueArray[i].checked == true){
+            let trueId = tr[i].id.substring(0, tr[i].id.length-1)
+            trueId = trueId.substring(1)
+            arrayIds.push(trueId)
+        }
+    }
+
+    let router = sender.layout.getService($Router)
+    localStorage.setItem('cardIds', JSON.stringify(arrayIds))
+    let urlResolver = sender.layout.getService($UrlResolver);
+    let requestManager = sender.layout.getService($RequestManager);
+    let folderId = window.location.href.split("Folder/")[1].split("?")[0]
+
+    let data = await getAgreementPersonsAndBookKeepers(urlResolver, requestManager, folderId)
+    let payOrderFolderId = data['payOrderFolderId']
+
+    router.goTo('#/NewCard/b9f7bfd7-7429-455e-a3f1-94ffb569c794/fc35d243-e36d-49f8-bcb0-60c1e6ff99b2/'+payOrderFolderId)
+    console.log(arrayIds)
+}
+
+
+export async function checkCand(sender){
+    console.log("checkCand");
+
+    let controls = sender.layout.controls
+    let checkCandidate = controls.checkCandidate
+    let candidate:TextArea = controls.candidate
+    let OtchetKandidat:TextArea = controls.OtchetKandidat
+    let commentControl = controls.textComment
+
+    let rowIndex = checkCandidate.indexOf(sender);
+    console.log(rowIndex)
+    for(let i=0; i<checkCandidate.length; i++){
+        if(i!=rowIndex && checkCandidate[i].params.value == true){
+            console.log(checkCandidate[i].params.value)
+            checkCandidate[i].params.value = false
+        }
+    }
+
+    for(let i=0; i<checkCandidate.length; i++){
+
+        if(checkCandidate[i].params.value == true){
+            let text = candidate[i].params.value
+
+            OtchetKandidat.params.value = null
+            OtchetKandidat.params.value = text
+            commentControl.value = "Согласован - " + text
+            commentControl.save()
+            OtchetKandidat.save()
+        }
+    }
+}
+
 
 export async function fillStaffDep(sender) {
     let controls = sender.layout.controls
@@ -97,7 +173,8 @@ export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) 
 
     await getAgreementPersonsAndBookKeepers(urlResolver, requestManager, idFolder)
         .then((data: string) => {
-            if (data['staffDepartment']) {
+            
+            if ((data['staffDepartment'])&&(controls.staffDepartment)) {
                 controls.staffDepartment.value = data["staffDepartment"]
             }
             if (cardKind == "Приказ по благотворительности") {
@@ -113,7 +190,7 @@ export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) 
                 if (data['charityOrderAgreementEmployees']) {
                     controls.agreementPersons.value = data['charityOrderAgreementEmployees']
                 }
-            } else if (cardKind == "Лист согласования кандиадата") {
+            } else if (cardKind == "Лист согласования кандидата") {
                 if (data['candidateAgreementCPKBoss']) {
                     controls.CPKChief.value = data['candidateAgreementCPKBoss']
                 }
@@ -149,6 +226,9 @@ export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) 
                 if (data['payOrderAgreementEmployees']) {
                     controls.contributePersons.value = data['payOrderAgreementEmployees']
                 }
+            }
+            if ((data['filial'])&&(controls.directoryDesignerRow1)) {
+                controls.directoryDesignerRow1.value = data["filial"]
             }
         })
         .catch((e) => {

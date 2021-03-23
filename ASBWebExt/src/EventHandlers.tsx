@@ -15,9 +15,42 @@ import { AgreementList } from "@docsvision/webclient/Approval/AgreementList";
 import { Numerator, NumeratorParams } from "@docsvision/webclient/BackOffice/Numerator";
 import { ICardSavingEventArgs } from "@docsvision/webclient/System/ICardSavingEventArgs";
 import { ICancelableEventArgs } from "@docsvision/webclient/System/ICancelableEventArgs";
+import { Links } from "@docsvision/webclient/BackOffice/Links";
 
-export async function NewFunc(sender: Layout) {
-    console.log("NewFunc");
+
+export async function newFunc(sender: Layout) {
+    console.log("newFunc");
+}
+
+
+export async function fixButtonsWidth(sender: Layout) {
+    console.log("fixButtonsWidth1");
+
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+    await delay(3000);
+    console.log("fixButtonsWidth2");
+
+    $("div[data-control-name='cardKindBlock']")[1].style.width = "100%"
+    let buttonContainers = $("div.state-button-wrapper")
+    let buttons = $("div.state-button-wrapper>button")
+    for (let i = 0; i < buttonContainers.length; i++) {
+        buttonContainers[i].style.width = "100%"
+        buttons[i].style.width = "100%"
+    }
+}
+
+
+export async function hideTaskInfoBlock(sender: Layout) {
+    console.log("hideTaskInfoBlock");
+
+    let taskControl = sender.layout.controls.taskBlock
+    let linkInfo = sender.layout.controls.links11.params.links[0].data
+    let contractFlag = linkInfo.displayName.includes("Договорной документ")
+    if (contractFlag) {
+        taskControl.params.visibility = true
+    } else {
+        taskControl.params.visibility = false
+    }
 }
 
 
@@ -40,7 +73,8 @@ export async function registerAgrmntTask(sender: Layout) {
     let requestManager = sender.layout.getService($RequestManager);
 
     let resp = await registerAgrmntTaskRequest(urlResolver, requestManager, taskId, timestamp)
-    console.log(resp);
+    location.reload()
+    console.log("resp: "+resp);
 }
 
 
@@ -65,19 +99,20 @@ export async function getLinksRequest(urlResolver: UrlResolver,
 }
 
 
-export async function showRegBtn(sender: Layout) {
+export async function showRegBtn(sender: Layout, e: IEventArgs) {
     console.log("showRegBtn");
 
+    let linksControl = sender.layout.controls.get<Links>("links")
+    let links = linksControl.params.links
     let regBtnCntrl = sender.layout.controls.regBtn
     let state = sender.layout.controls.state.params.value.caption
-    let links = sender.layout.controls.links.params.links
+    
     let docId = links.length ? links[0].data.cardId : ""
     if (docId) {
         let urlResolver = sender.layout.getService($UrlResolver);
         let requestManager = sender.layout.getService($RequestManager);
         let resp = await getLinksRequest(urlResolver, requestManager, docId)
         console.log(resp);
-        
     }
 
     if ((state == "Не начато") || (state == "В работе")) {
@@ -562,6 +597,86 @@ export async function getHeaderInfo(urlResolver: UrlResolver, requestManager: IR
 }
 
 
+export async function prepAgrORD(sender: AgreementList) {
+    console.log("prepAgrORD");
+
+    let cardId = sender.layout.cardInfo.id;
+    let urlResolver = sender.layout.getService($UrlResolver);
+    let requestManager = sender.layout.getService($RequestManager);
+    let agreementList = sender.layout.controls.agreementList;
+    let didgest = sender.layout.controls.textBox1.params.value
+    let registrarCtrl = sender.layout.controls.registrar
+    let registrarName = registrarCtrl.params.value?registrarCtrl.params.value.displayName:"_________________"
+    
+    layoutManager.cardLayout.controls.agreementList.params.agreementReportOpening.subscribe(
+        async (handler, args) => {
+        args.data.model.documentName = `${didgest}. Инициатор: ${registrarName}`
+    });
+
+
+    agreementList.params.agreementReportOpened.subscribe(async (handler, args) => {
+        console.log("agreementReportOpened");
+        let showOnHovRows = document.querySelectorAll('.show-on-hover')
+        showOnHovRows.forEach(element => {
+            element.classList.remove("show-on-hover")
+        });
+        let tableItem = document.querySelectorAll('.system-agreement-list-content>div:last-child')
+        tableItem[0].setAttribute("style", "font-size:80%;")
+
+        let contentControl = args.contentControl;
+        console.log(contentControl);
+        args.contentControl.columns.splice(1, 5);
+        let columns = contentControl.columns;
+        let index = args.contentControl.columns.indexOf(args.contentControl.commentColumn);
+        columns.push({
+            name: "ФИО согласующего",
+            wieght: 1,
+            value: (item) => item.fio,
+            class: 'fio'
+        }, {
+            name: "Дата начала",
+            wieght: 1,
+            value: (item) => item.beginDate,
+            class: 'beginDate'
+        }, {
+            name: "Дата завершения",
+            wieght: 1,
+            value: (item) => item.endDate,
+            class: 'endDate'
+        }, {
+            name: "Принятое решение",
+            wieght: 1,
+            value: (item) => item.decision,
+            class: 'decision'
+        }, {
+            name: "Комментарии",
+            wieght: 1,
+            value: (item) => item.comment,
+            class: 'comments'
+        });
+
+        let receivedFromSererItems = await getAgreement(urlResolver, requestManager, cardId);
+        let ObjectMas = receivedFromSererItems['items']
+
+        args.model.items = ObjectMas.map(serverItem => (
+            {
+                fio: serverItem['fio'],
+                beginDate: moment(serverItem['beginDate']).format('DD.MM.YYYY HH:mm'),
+                endDate: moment(serverItem['endDate']).isValid() ? moment(serverItem['endDate']).format('DD.MM.YYYY HH:mm') : '',
+                decision: serverItem['decision'],
+                comment: serverItem['comment']
+
+            }));
+        args.contentControl.forceUpdate();
+        let cellsElems = document.querySelectorAll('.table-helper-cell')
+        cellsElems.forEach(element => {
+            element.classList.add("text-center")
+        });
+        console.log(columns)
+    });
+}
+
+
 export async function prepAgrSZ(sender: AgreementList) {
     console.log("prepAgrSZ");
 
@@ -829,8 +944,6 @@ export async function prepAgrListOutLettr(sender: AgreementList) {
                 comment: serverItem['comment']
 
             }));
-
-
 
         args.contentControl.forceUpdate();
         let cellsElems = document.querySelectorAll('.table-helper-cell')
@@ -1107,9 +1220,6 @@ export async function sendToReceiverOnWatch(sender: Layout, e: IEventArgs) {
         .catch((ex) => {
             MessageBox.ShowError(ex, "Задание на ознакомление не отправлено.");
         })
-
-
-
 }
 
 

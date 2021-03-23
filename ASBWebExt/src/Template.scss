@@ -7,6 +7,19 @@
 //     width: 30% !important;
 // }
 
+.links-header>div>.title{
+    // content:'asdfasd';
+    display: none !important;
+}
+
+.report-panel>.header {
+    display: none !important; 
+}
+
+.label-cell {
+    width: auto !important;
+}
+
 .system-agreement-list-content .agreement-list-caption {
     white-space: pre-wrap
 }
