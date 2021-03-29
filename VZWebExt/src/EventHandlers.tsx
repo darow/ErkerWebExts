@@ -16,36 +16,94 @@ export async function newFunc(sender:Layout) {
 }
 
 
-export async function createFileRows(sender:Layout) {
-    console.log("createFileRows");
+export async function setDefaultVals(sender:Layout) {
+    console.log("setDefaultVals");
 
-    let fileTable = sender.layout.controls.fileTable
-    await fileTable.addRow();
-    await fileTable.addRow();
-    await fileTable.addRow();
-    let fileLabels = sender.layout.controls.fileLabel
-    fileLabels[0].value =  "Устав"
-    fileLabels[1].value =  "Свидетельство"
-    fileLabels[2].value =  "Паспорт"
+    sender.layout.controls.partnerType.value = {
+        "id": "a1547b93-cc84-45e6-9e3e-78f23dd915eb",
+        "name": "Покупатель",
+        "description": ""
+      }
+    sender.layout.controls.activityType.value = {
+        "id": "a87c0bc5-19d6-460f-b92c-7863bcf984a6",
+        "name": "Основной бизнес",
+        "description": ""
+      }
 }
 
 
-export async function crtRmSignerFileRow(sender:Layout) {
-    console.log("crtRmSignerFileRow");
+// Кастомный файловый контрол (точно юзлесс, но жалко было удалить сразу)
+// export async function createFileRows(sender:Layout) {
+//     console.log("createFileRows");
 
-    let fileTable = sender.layout.controls.fileTable
+//     let fileTable = sender.layout.controls.fileTable
+//     await fileTable.addRow();
+//     await fileTable.addRow();
+//     await fileTable.addRow();
+//     let fileLabels = sender.layout.controls.fileLabel
+//     fileLabels[0].value =  "Устав"
+//     fileLabels[1].value =  "Свидетельство"
+//     fileLabels[2].value =  "Паспорт"
+// }
+
+
+export async function RemoveCreateSignerFileRow(sender:Layout) {
+    console.log("RemoveCreateSignerFileRow");
+
+    let tab = sender.layout.controls.get<Tab>("tabs"); 
+    let myTab = tab.params.tabPages[1]; 
+    let tabpageModel = await tab.loadTabPage(myTab);
+
+    let checkListTable = sender.layout.controls.checkListTable
     let mainBossIsSigner = sender.layout.controls.mainBossIsSigner.value
-    if (mainBossIsSigner) {
-        if (fileTable.rows.length == 3) {
-            await fileTable.addRow();
-            sender.layout.controls.fileLabel[3].value = "Доверенность подписанта" 
-        } 
-    } else {
-        if (fileTable.rows.length == 4) {
-            await fileTable.removeRow(fileTable.rows[3]);
-        } 
+    let labels = sender.layout.controls.CLTDirDesRow
+    let signerFileRow = -1
+
+    if (labels) {
+        for (let i = 0; i < labels.length; i++) {
+            if (labels[i].value.name == "Доверенность подписанта") {
+                signerFileRow = i 
+            }
+        }
     }
-    
+
+    if (mainBossIsSigner) {
+        if (signerFileRow != -1) {
+            await checkListTable.removeRow(checkListTable.rows[signerFileRow])
+        }
+    } else {
+        if (signerFileRow == -1) {
+            await checkListTable.addRow()
+            labels = sender.layout.controls.CLTDirDesRow
+            labels[labels.length-1].value = {
+            "id": "12d0ca6e-05eb-458a-985b-c65fea06a8a5",
+            "name": "Доверенность подписанта",
+            "description": "",
+            "nodeType": 1,
+            "childrenLoaded": true,
+            "children": null
+            }
+        }
+    }
+}
+
+
+export async function setCompanySigner(sender:Layout) {
+    console.log("setCompanySigner");
+
+    let leaderIsSigner = sender.layout.controls.leaderIsSigner.value
+    let leaderBlock = sender.layout.controls.leaderBlock
+    let signerControl = sender.layout.controls.signer
+
+    if (leaderIsSigner) {
+        signerControl.params.required = false
+        signerControl.params.visibility = false
+        leaderBlock.params.width = 100
+    } else {
+        signerControl.params.required = true
+        signerControl.params.visibility = true
+        leaderBlock.params.width = 50
+    }  
 }
 
 
@@ -57,7 +115,6 @@ export async function setPartnerSigner(sender:Layout) {
     let partnerSignerControl = sender.layout.controls.partnerSigner
     let mainBossControl = sender.layout.controls.mainBoss
 
-
     if (mainBossIsSigner) {
         partnerSignerControl.params.required = false
         partnerSignerControl.params.visibility = false
@@ -66,8 +123,7 @@ export async function setPartnerSigner(sender:Layout) {
         partnerSignerControl.params.required = true
         partnerSignerControl.params.visibility = true
         mainBossBlock.params.width = 50
-    }
-    
+    }  
 }
 
 
@@ -99,8 +155,11 @@ export async function fillCheckListTable(sender:Layout) {
     
 
     if (!isCheckedFlag) {
+        let labels = sender.layout.controls.get("CLTDirDesRow") 
+        // ||(checkListTable.rows.length==1)&&(labels[0].value=="Доверенность подписанта")
         while (checkListTable.rows.length>0) {
             await checkListTable.removeRow(checkListTable.rows[0])
+            labels = sender.layout.controls.get("CLTDirDesRow") 
         }
 
         let categoryControlValue = sender.layout.controls.partnerCategory.params.value
@@ -113,12 +172,12 @@ export async function fillCheckListTable(sender:Layout) {
         while (checkListTable.rows.length<items.length) {
             await checkListTable.addRow()
         }
-        let tableDirDesRows
-        for (let i = 0; i < items.length; i++) {
-            tableDirDesRows = sender.layout.controls.get("CLTDirDesRow")    
-            tableDirDesRows[i].params.value = items[i]
+        labels = sender.layout.controls.get("CLTDirDesRow") 
+        for (let i = 0; i < items.length; i++) {           
+            labels[i].params.value = items[i]
         }
     }
+    await RemoveCreateSignerFileRow(sender)
 }
 
 

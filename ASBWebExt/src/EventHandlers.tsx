@@ -23,6 +23,43 @@ export async function newFunc(sender: Layout) {
 }
 
 
+
+export async function hideRegisterSignedBtn(sender: Layout) {
+    console.log("hideRegisterSignedBtn");
+
+    const signedStateId = "9aec79df-4f1f-4d57-a481-f21b9f3428ba"
+    let currentStateId = sender.layout.controls.state.params.value.stateId.toLowerCase()
+    
+    if (currentStateId == signedStateId) {
+        let regBtn = sender.layout.controls.registerSignedBtn.params.visibility = false
+    }
+}
+
+
+export async function registerSignedOutCome(sender: Layout) {
+    console.log("registerSignedOutCome");
+
+    let numId = layoutManager.cardLayout.controls.regNumber.value.id
+    if (!numId) {
+        sender.layout.controls.regNumber.generateNewNumber()
+        let regDate = sender.layout.controls.regDate
+        regDate.value = moment() 
+        regDate.save()
+    }
+}
+
+
+export async function setRegDate(sender: Layout, args: CancelableEventArgs<ICardSavingEventArgs>) {
+    console.log("setRegDate");
+
+    args.wait()
+    layoutManager.cardLayout.controls.regDate.params.value = moment()
+    layoutManager.cardLayout.controls.regDate.save()
+    args.accept()
+}
+
+
+
 export async function fixButtonsWidth(sender: Layout) {
     console.log("fixButtonsWidth1");
 

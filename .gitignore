@@ -17,7 +17,6 @@
 !/VZWebExt/src
 !/VZWebExt/src/*
 
-
 !/TestWebExt/
 /TestWebExt/**
 !/TestWebExt/src
@@ -27,4 +26,14 @@
 /ASBWebExt/**
 !/ASBWebExt/src
 !/ASBWebExt/src/*
+
+!/FoodMasterWebExt/
+/FoodMasterWebExt/**
+!/FoodMasterWebExt/src
+!/FoodMasterWebExt/src/*
+
+!/FoodMasterZayavkyWebExt/
+/FoodMasterZayavkyWebExt/**
+!/FoodMasterZayavkyWebExt/src
+!/FoodMasterZayavkyWebExt/src/*
 
