@@ -11,7 +11,63 @@ import { TextArea } from "@docsvision/webclient/Platform/TextArea";
 import { $Router } from "@docsvision/webclient/System/$Router";
 
 
-export async function createNewOrder(sender){
+export async function addLinksToCard1(sender){
+    console.log('addLinksToCard1')
+
+    let links = sender.layout.controls.links
+    if (localStorage.getItem('cardIds') !== null) {
+        let urlResolver = sender.layout.getService($UrlResolver);
+        let requestManager = sender.layout.getService($RequestManager);
+        let cards = JSON.parse(localStorage.getItem('cardIds'))
+        let length = cards.length
+        let parentCardId = sender.layout.cardInfo.id;
+
+        for(let i=0; i< length; i++) {
+            let timestamp = sender.layout.cardInfo.timestamp;
+            let childrenCardId = cards[i]
+            await addLinkToLinks1(urlResolver, requestManager, childrenCardId, parentCardId,
+                 timestamp).then((data: string) => {
+                    console.log(data)
+                })
+                .catch((ex) => {
+                    console.log(ex)
+                })
+            console.log("123")
+        }
+        console.log("1233")
+    }
+    console.log('Начало')
+    localStorage.removeItem('cardIds')
+    localStorage.getItem('cardIds')
+    console.log('конец')
+}
+
+
+export async function addLinkToLinks1(urlResolver: UrlResolver, requestManager: IRequestManager,
+     childrenCardId, parentCardId, timestamp) {
+    console.log('addLinkToLinks1')
+
+    let url = urlResolver.resolveApiUrl("addExistingCardLink", "layoutLinks");
+    let postdata = {
+        sourceCardId: parentCardId,
+        sourceCardTimestamp: timestamp,
+        destinationCardId: childrenCardId,
+        linkTypeId: "90d0724e-08f4-4391-a0b0-3f4b6bbeefa3",
+        saveHardLink: false,
+        editOperation: "00000000-0000-0000-0000-000000000000",
+        isReport: false,
+        isFile: false,
+        linksBinding: {
+            dataSourceResolverId: "00000000-0000-0000-0000-000000000000",
+            sectionId: "30eb9b87-822b-4753-9a50-a1825dca1b74",
+            fieldAlias: "ReferenceList"
+        }
+    }
+    return requestManager.post(url, JSON.stringify(postdata))
+}
+
+
+export async function createNewOrder1(sender){
     console.log("createNewOrder");
 
     let inputs = document.getElementsByTagName('input')

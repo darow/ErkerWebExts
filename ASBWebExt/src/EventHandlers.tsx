@@ -24,28 +24,12 @@ export async function newFunc(sender: Layout) {
 
 
 
-export async function hideRegisterSignedBtn(sender: Layout) {
-    console.log("hideRegisterSignedBtn");
-
-    const signedStateId = "9aec79df-4f1f-4d57-a481-f21b9f3428ba"
-    let currentStateId = sender.layout.controls.state.params.value.stateId.toLowerCase()
-    
-    if (currentStateId == signedStateId) {
-        let regBtn = sender.layout.controls.registerSignedBtn.params.visibility = false
-    }
-}
-
-
-export async function registerSignedOutCome(sender: Layout) {
-    console.log("registerSignedOutCome");
-
-    let numId = layoutManager.cardLayout.controls.regNumber.value.id
-    if (!numId) {
-        sender.layout.controls.regNumber.generateNewNumber()
-        let regDate = sender.layout.controls.regDate
-        regDate.value = moment() 
-        regDate.save()
-    }
+export async function checkRegNum(urlResolver: UrlResolver,
+    requestManager: IRequestManager, documentId: String, numberId: String) {
+    let url = urlResolver.resolveUrl("IsNumberFromNumerator", "DocumentASB", false);
+    url += "?documentId=" + documentId + "&numberId=" + numberId;
+    console.log("checkRegNum: " + url);
+    return requestManager.get(url)
 }
 
 
@@ -131,7 +115,6 @@ export async function getLinksRequest(urlResolver: UrlResolver,
             "2b959168-d2c6-4350-b0a8-c276ff3496d7"],
         "columnViewMode": 2, "columnViewExtensionName": null
     }
-
     return requestManager.post(url, JSON.stringify(postdata));
 }
 
@@ -1162,6 +1145,42 @@ export async function registerORD(sender: Layout, args: CancelableEventArgs<any>
 }
 
 
+
+// export async function hideRegisterSignedBtn(sender: Layout) {
+//     console.log("hideRegisterSignedBtn");
+
+//     const signedStateId = "9aec79df-4f1f-4d57-a481-f21b9f3428ba"
+//     let currentStateId = sender.layout.controls.state.params.value.stateId.toLowerCase()
+//     if (currentStateId != signedStateId) {
+//         let regBtn = sender.layout.controls.registerSignedBtn.params.visibility = false
+//     }
+// }
+
+
+// export async function registerSignedOutCome(sender: Layout) {
+//     console.log("registerSignedOutCome");
+
+//     let numId = layoutManager.cardLayout.controls.regNumber.value.id
+//     let documentId = layoutManager.cardLayout.cardInfo.id
+
+//     let urlResolver = sender.layout.getService($UrlResolver);
+//     let requestManager = sender.layout.getService($RequestManager);
+
+//     if (numId) {
+//         var resp = await checkRegNum(urlResolver, requestManager, documentId, numId)
+//     } 
+    
+//     if ((!numId)||(!resp)) {
+//         await sender.layout.controls.regNumber.generateNewNumber() 
+//         let regDate = sender.layout.controls.regDate 
+//         regDate.value = moment() 
+//         regDate.save() 
+//     } else {
+//         MessageBox.ShowInfo('Попытка повторной генерации номера', 'Существующий номер уже был сгенерирован.')
+//     }
+// }
+
+
 export async function registerOutCome(sender: Layout, args: CancelableEventArgs<any>) {
     console.log("registerOutCome")
 
@@ -1169,7 +1188,7 @@ export async function registerOutCome(sender: Layout, args: CancelableEventArgs<
     let stateId = sender.layout.controls.state.params.value.stateId
     const draftingStateId = "AAE1C071-82E9-4D4B-9219-9F172BF0B071"
     const isApprovedStateId = "5CF670C9-6EAE-40A2-974E-ADF269720177"
-    let regDate = sender.layout.controls.dateTimePicker11
+    let regDate = sender.layout.controls.regDate
 
     // console.log("(numerator.value.number == null)", (numerator.value.number == null))
     console.log("((stateId == draftingStateId) || (stateId == isApprovedStateId))",
@@ -1184,7 +1203,31 @@ export async function registerOutCome(sender: Layout, args: CancelableEventArgs<
         await regDate.save()
         await sender.layout.changeState("A5875A98-12A7-4EB2-A581-4FF7912B32BB")
     } else {
+        
         console.log('wrong state now or number already exist!')
+        // В состоянии подписано
+        const signedStateId = "9aec79df-4f1f-4d57-a481-f21b9f3428ba"
+        let currentStateId = sender.layout.controls.state.params.value.stateId.toLowerCase()
+        if (currentStateId == signedStateId) {
+            let numId = layoutManager.cardLayout.controls.regNumber.value.id
+            let documentId = layoutManager.cardLayout.cardInfo.id
+
+            let urlResolver = sender.layout.getService($UrlResolver);
+            let requestManager = sender.layout.getService($RequestManager);
+
+            if (numId) {
+                var resp = await checkRegNum(urlResolver, requestManager, documentId, numId)
+            } 
+            
+            if ((!numId)||(!resp)) {
+                await sender.layout.controls.regNumber.generateNewNumber() 
+                let regDate = sender.layout.controls.regDate 
+                regDate.value = moment() 
+                regDate.save() 
+            } else {
+                MessageBox.ShowInfo('Попытка повторной генерации номера', 'Существующий номер уже был сгенерирован.')
+            }
+        }
         return
     }
     location.reload()

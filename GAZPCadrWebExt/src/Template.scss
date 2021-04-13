@@ -2,6 +2,12 @@
     font-weight: bold;
 }
 
+span.title {
+    color: black !important;
+    font-weight: bold !important;
+}
+
+
 div.edit-employee-list {
     padding: 0px 10px !important;
 }
@@ -10,10 +16,6 @@ div.edit-employee-list {
     white-space: nowrap !important;
 }
 
-span.title {
-    color: black !important;
-    font-weight: bold !important;
-}
 
 .opacity-half {
     opacity: .5;

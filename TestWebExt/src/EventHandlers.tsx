@@ -2,36 +2,99 @@
 import {Layout} from "@docsvision/webclient/System/Layout"
 import {IDataChangedEventArgs} from "@docsvision/webclient/System/IDataChangedEventArgs"
 import {NumberControl} from "@docsvision/webclient/Platform/Number"
-// import moment from 'moment'
+import moment from 'moment'
 import {$UrlResolver} from "@docsvision/webclient/System/$UrlResolver"
 import {UrlResolver} from "@docsvision/webclient/System/UrlResolver"
 import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$RequestManager"
 import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox"
+import { $CurrentEmployee } from "@docsvision/webclient/StandardServices"
 
 
-export async function callTable(sender: Layout) {
-    console.log("callTable")
-
-
+export async function showReportAboutEmployees(sender: Layout) {
+    console.log("showReportAboutEmployees")
+    
+    let urlResolver = sender.layout.getService($UrlResolver)
+    let requestManager = sender.layout.getService($RequestManager)
+    let startDate = moment(sender.layout.controls.reportStartDate.value).format('M.D.YYYY')
+    let endDate = moment(sender.layout.controls.reportEndDate.value).format('M.D.YYYY')
+    let empls = sender.layout.controls.multipleEmployees1.value;
+    let employeesData = []
+    for (let i = 0; i < empls.length; i++) {
+        console.log(empls[i].id)
+        let employeeId = empls[i].id
+        let emplTasksCount = await getEmplTasksCount(urlResolver, requestManager, employeeId)
+        let emplTasksPerDayCount = await getEmplTasksPerDayCount(urlResolver, requestManager, employeeId, startDate, endDate)
+        employeesData.push({
+            'fio': empls[i].displayName,
+            'taskCount': emplTasksCount['taskCount'],
+            'expiredCount': emplTasksCount['expiredCount'],
+            'emplTasksPerDayCount': emplTasksPerDayCount['employeeTasksList']
+        })
+    }
+    let data = JSON.stringify(employeesData)
+    console.log(data);
     window.open(
-        "http://localhost:8002/?operation=circleDiagram&done=123&outTerm=321&changedDate=502",
+        `http://localhost:8002/?operation=tasksReport&employeesData=${data}`,
         '_blank'
-      );
-
-    // let urlResolver = sender.layout.getService($UrlResolver)
-    // let requestManager = sender.layout.getService($RequestManager)
-
-    // await getTable(urlResolver, requestManager)
-    //             .then((data: string) => {
-    //                            console.log(data)
-    //             })
+    )   
 }
 
 
+export async function callReportAboutCurrentEmpl(sender: Layout) {
+    console.log("callReportAboutCurrentEmpl")
+    
+    let currentUser = sender.layout.getService($CurrentEmployee)
+    let currentEmplId = currentUser.id;
+    callReport(sender, currentEmplId)
+}
 
-export async function getTable(urlResolver: UrlResolver, requestManager: IRequestManager) {
-    let url = "http://localhost:8002/?operation=circleDiagram&done=123&outTerm=321&changedDate=502"
 
+export async function callReportAboutEmplInForm(sender: Layout) {
+    console.log("callReportAboutEmplInForm")
+    
+    let employeeId = sender.layout.controls.employee.value.id
+    callReport(sender, employeeId)
+}
+
+
+export async function callReport(sender, emplId) {
+    console.log("callReport")
+    
+    let employeeId = sender.layout.controls.employee.value.id
+    let employeeName = sender.layout.controls.employee.value.displayName
+    let urlResolver = sender.layout.getService($UrlResolver)
+    let requestManager = sender.layout.getService($RequestManager)
+    let startDate = moment(sender.layout.controls.reportStartDate.value).format('M.D.YYYY')
+    let endDate = moment(sender.layout.controls.reportEndDate.value).format('M.D.YYYY')
+
+    let emplTasksCount = await getEmplTasksCount(urlResolver, requestManager, employeeId)
+    let emplTasksPerDayCount = await getEmplTasksPerDayCount(urlResolver, requestManager, employeeId, startDate, endDate)
+    let dataToSend = [{
+        'fio': employeeName,
+        'taskCount': emplTasksCount['taskCount'],
+        'expiredCount': emplTasksCount['expiredCount'],
+        'emplTasksPerDayCount': emplTasksPerDayCount['employeeTasksList']
+    }]
+    let data = JSON.stringify(dataToSend)
+
+    window.open(
+        `http://localhost:8002/?operation=tasksReport&employeesData=${data}`,
+        '_blank'
+    )  
+}
+
+
+export async function getEmplTasksPerDayCount(urlResolver: UrlResolver, requestManager: IRequestManager, emplId, startDate, endDate) {
+    let url = urlResolver.resolveUrl("GetEmployeeTasks", "Chart")
+    url += "?startDate=" + startDate + "&endDate=" + endDate + "&employeeId=" + emplId
+    // http://localhost:83/DocsvisionWebClient/Chart/GetEmployeeTasks?startDate=6/1/2020&endDate=1/1/2021&employeeId=59CDDEB1-0FA8-4581-A088-2EE555FE5B84
+    return requestManager.get(url)
+}
+
+
+export async function getEmplTasksCount(urlResolver: UrlResolver, requestManager: IRequestManager, emplId) {
+    let url = urlResolver.resolveApiUrl("GetTaskCount", "EmployeeService")
+    url += "?emplID=" + emplId
     return requestManager.get(url)
 }
 
@@ -51,9 +114,6 @@ export async function pythTestt(sender: Layout) {
 }
 
 
-
-// Все функции, классы и переменные используемые за пределами модуля (т.е. файла)
-// должны экспортироваться (содержать ключевое слово export в объявлении).
 export async function prepareDocument(sender: Layout, e: IEventArgs) {
     console.log(sender.layout.cardInfo.timestamp)
     let timestamp = sender.layout.cardInfo.timestamp
