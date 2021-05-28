@@ -129,6 +129,7 @@ export async function fillAgreementList1(sender: AgreementList, e: IEventArgs) {
     let description = sender.layout.controls.description
     let cardKind = sender.layout.controls.cardKind
     let valuteName = sender.layout.controls.dropdown4;
+    let ndsSum = sender.layout.controls.number3.value
 
     let receivedFromServerItems = await getAgreement1(urlResolver, requestManager, cardId);
     sender.layout.controls.agreementList.params.agreementReportOpening.subscribe(
@@ -138,13 +139,16 @@ export async function fillAgreementList1(sender: AgreementList, e: IEventArgs) {
                 console.log('receivedFromServerItems["baseDocumentInfo"] != null')
                 mainDocumentInfo = ` к ${receivedFromServerItems['baseDocumentInfo']}`
             }
+            let summSNDS = summ.params.value? summ.params.value:''
+            let summBEZNDS = sender.layout.controls.number3.value? sender.layout.controls.number3.value:''
             args.data.model.documentName = `К документу ${appKind.params.value == null ? '' : appKind.params.value.name} № ${regNumber.params.value.number} от ${moment(regDate.params.value).format('L')} ${mainDocumentInfo}\n
-                Автор: ${iniciator.params.value == null ? '' : iniciator.params.value.displayName}\n
-                Контрагент: ${partnersDepartment1.params.value == null ? '' : partnersDepartment1.params.value.name}\n
-                Сумма договора: ${summ.params.value} (${valuteName.params.value ? valuteName.params.value : ''})\n
-                Действителен до: ${moment(dateEnd.params.value).format('L')}\n
-                Порядок оплаты: ${dropdown1.params.value == null ? '' : dropdown1.params.value}\n
-                Предмет договора: ${description.params.value == null ? '' : description.params.value}
+Автор: ${iniciator.params.value == null ? '' : iniciator.params.value.displayName}\n
+Контрагент: ${partnersDepartment1.params.value == null ? '' : partnersDepartment1.params.value.name}\n
+Сумма договора с НДС: ${summSNDS} (${valuteName.params.value ? valuteName.params.value : ''})\n
+Сумма договора без НДС: ${summBEZNDS} (${valuteName.params.value ? valuteName.params.value : ''})\n
+Действителен до: ${moment(dateEnd.params.value).format('L')}\n
+Порядок оплаты: ${dropdown1.params.value == null ? '' : dropdown1.params.value}\n
+Предмет договора: ${description.params.value == null ? '' : description.params.value}\n
                 `
         })
 

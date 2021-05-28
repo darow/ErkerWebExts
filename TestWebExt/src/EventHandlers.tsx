@@ -10,6 +10,17 @@ import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox"
 import { $CurrentEmployee } from "@docsvision/webclient/StandardServices"
 
 
+export async function addAgreementList(sender: Layout) {
+    console.log("addAgreementList")
+
+
+}
+
+export async function test() {
+    alert("test")
+}
+
+
 export async function showReportAboutEmployees(sender: Layout) {
     console.log("showReportAboutEmployees")
     

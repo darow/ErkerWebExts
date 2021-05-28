@@ -137,9 +137,9 @@ export async function getCheckList(urlResolver: UrlResolver, requestManager: IRe
 export async function fillCheckListTable(sender:Layout) {
     console.log("fillCheckListTable");
    
-    let tab = sender.layout.controls.get<Tab>("tabs"); 
-    let myTab = tab.params.tabPages[1]; 
-    let tabpageModel = await tab.loadTabPage(myTab);
+    // let tab = sender.layout.controls.get<Tab>("tabs"); 
+    // let myTab = tab.params.tabPages[1]; 
+    // let tabpageModel = await tab.loadTabPage(myTab);
 
     let checkListTable = sender.layout.controls.checkListTable
 

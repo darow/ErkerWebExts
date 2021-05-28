@@ -9,6 +9,148 @@ import {$RequestManager, IRequestManager} from "@docsvision/webclient/System/$Re
 import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox";
 import { TextArea } from "@docsvision/webclient/Platform/TextArea";
 import { $Router } from "@docsvision/webclient/System/$Router";
+import { CancelableEventArgs } from "@docsvision/webclient/System/CancelableEventArgs";
+import { LayoutControl } from "@docsvision/webclient/System/BaseControl";
+import { $CardId } from "@docsvision/webclient/System/LayoutServices";
+
+
+export function clearComment(sender: LayoutControl, e: CancelableEventArgs<any>) {
+    let cardId = sender.layout.getService($CardId);
+    let requestManager = sender.layout.getService($RequestManager);
+    let {controls} = sender.layout;
+
+    let comment = controls.get<TextArea>("textComment")
+    console.log(e);
+
+    const commentInModal = e.data.layout.childControls[0].childControls[1].childControls[0].childControls[0];
+    
+    if(e.data.operationData.additionalInfo.decisionName === "Отказано"){
+        e.wait()
+        comment.params.value = "_"
+        comment.save()
+        commentInModal.params.value = "_"
+        e.accept()
+    }    
+    console.log("Работает 3");  
+}
+
+
+export async function watchArgs(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("watchArgs")
+
+    args.wait()
+
+    console.log(args);
+    let commentControl = sender.layout.controls.textComment
+
+    let cancelBtn = document.querySelector('button[class="button-helper card-type-background-color-hover card-type-background-color-light primary-button align-center"]') as HTMLElement
+    if (cancelBtn==args["target"]) {
+        let input = document.querySelector('div[data-control-name="Comment_completeTaskConditionsTable"]>div>div>div>input') as HTMLInputElement
+        // input.value = "_" 
+        commentControl.value = '_'
+        await commentControl.save()
+    }
+    args.accept()
+}
+
+
+export async function clearCmntOnCancel(sender: Layout, args: CancelableEventArgs<any>) {
+    console.log("clearCmntOnCancel")
+
+    console.log(args);
+    let commentControl = sender.layout.controls.textComment
+    let cancelBtn = document.querySelector('button[data-button-name="Отказано"]') as HTMLElement
+    cancelBtn.onclick = function() {
+        args.wait()
+        commentControl.value = ''
+        sender.layout.save()
+        args.accept()
+    }
+    
+    
+    // const mainNode = document.querySelector('aside#right-sidebar-helper')
+
+    // function callback(mutationsList, observer) {
+    //     console.log('Mutations:', mutationsList)
+    //     console.log('Observer:', observer)
+    //     mutationsList.forEach(mutation => {
+    //         if (mutation.attributeName === 'class') {
+    //             alert('Ch-ch-ch-changes!')
+    //         }
+    //     })
+    // }
+    
+    // const mutationObserver = new MutationObserver(callback)
+    
+    // mutationObserver.observe(mainNode, { attributes: true })
+
+
+    // args.wait()
+    // // let cancelBtn = document.querySelector('button[data-tipso-text="Отказано"]')
+    // let commentControl = sender.layout.controls.textComment
+    // $('button[data-tipso-text="Отказано"]').mouseenter(function() {
+    //     commentControl = ''
+    //     commentControl.save() 
+    // })
+    // // cancelBtn.mouseenter("click", function(sender) {
+        
+    // //     .mouseenter(function() {
+        
+    // // })
+    // args.accept()
+}
+
+
+
+export async function createFakeAgrBtn(sender){
+    console.log('changeCandAgrmnt')
+
+    let fakeBtn = document.createElement('button')
+    fakeBtn.classList.add('fake-agreement-btn')
+    fakeBtn.innerHTML = 'СОГЛАСОВАНО'
+    fakeBtn.onclick = function() {
+        MessageBox.ShowInfo('Не выбран кандидат', 'Согласовать нельзя')
+    }
+    let agrBtnElmnt = document.querySelector('button[data-button-name="Согласовано"]') as HTMLElement
+    let parentNode = agrBtnElmnt.parentNode
+    
+    agrBtnElmnt.classList.remove('align-center')  
+    parentNode.insertBefore(fakeBtn, agrBtnElmnt)
+    showFakeAgrBtn(sender, true)
+}
+
+
+export async function showFakeAgrBtn(sender, hideTrueBtn){
+    console.log('showFakeAgrBtn')
+
+    let trueAgrBtn = document.querySelector('button[data-button-name="Согласовано"]') as HTMLElement
+    let fakeAgrBtn = document.querySelector('button.fake-agreement-btn') as HTMLElement
+    if (hideTrueBtn) {
+        trueAgrBtn.style.display='none'
+        fakeAgrBtn.style.display='block'
+    } else {
+        trueAgrBtn.style.display='flex'
+        fakeAgrBtn.setAttribute('style', 'display:none !important');
+    }
+}
+
+
+export async function changeCandAgrmntLayout(sender){
+    console.log('changeCandAgrmnt')
+    
+    let tableHelperCell = document.querySelector('.links_table-row>.table-helper-cell') as HTMLElement;
+    if (tableHelperCell) {
+        tableHelperCell.style.paddingLeft = '0px'
+    }
+    let nameCell = document.querySelector('.links_table-row>.table-helper-cell>.name-cell') as HTMLElement;
+    if (nameCell) {
+        nameCell.style.paddingLeft = '6px'
+    }
+    let infoCell = document.querySelector('.info-cell') as HTMLElement;
+    if (infoCell) {
+        infoCell.style.display = 'none'
+    }
+}
 
 
 export async function addLinksToCard1(sender){
@@ -125,18 +267,23 @@ export async function checkCand(sender){
         }
     }
 
+    let checkExist = false
     for(let i=0; i<checkCandidate.length; i++){
-
         if(checkCandidate[i].params.value == true){
+            checkExist = true
             let text = candidate[i].params.value
-
             OtchetKandidat.params.value = null
             OtchetKandidat.params.value = text
             commentControl.value = "Согласован - " + text
-            commentControl.save()
-            OtchetKandidat.save()
+            showFakeAgrBtn(sender, false)
         }
     }
+    if (!checkExist) {
+        commentControl.value = ""
+        showFakeAgrBtn(sender, true)
+    } 
+    commentControl.save()
+    OtchetKandidat.save()
 }
 
 
@@ -179,7 +326,7 @@ export async function fillCandAgreementInfo(sender) {
                 infLabel.params.text = `
                Вам на рассмотрение поступил "Отчет о кандидатах" на должность <${data['plannedPosition']}> в подразделение
                 <${data['staffDep']}> (руководитель <${data['staffDepManager']}>)!
-                  Характер работы: <${permTemp}>.
+                  Характер работы: <${permTemp}>. Укажите фамилию одного выбранного Вами кандидата и завершите задание выбрав решение.
                `
             })
     }
@@ -192,7 +339,7 @@ export async function getCandAgreementInfo(urlResolver: UrlResolver, requestMana
 }
 
 export async function fillStaffDepManager(sender) {
-    let staffDepControl = sender.layout.controls.staffDepartment
+    let staffDepControl = sender.layout.controls.staffDepartment1
     let staffDepManagerControl = sender.layout.controls.staffDepartmentManager
     let staffDepId = staffDepControl.value.id
     if (staffDepId != null) {
@@ -230,9 +377,9 @@ export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) 
     await getAgreementPersonsAndBookKeepers(urlResolver, requestManager, idFolder)
         .then((data: string) => {
             
-            if ((data['staffDepartment'])&&(controls.staffDepartment)) {
-                controls.staffDepartment.value = data["staffDepartment"]
-            }
+            // if ((data['staffDepartment'])&&(controls.staffDepartment)) {
+            //     controls.staffDepartment1.value = data["staffDepartment"]
+            // }
             if (cardKind == "Приказ по благотворительности") {
                 if (data['charityOrderMainBookKeeper']) {
                     controls.mainBookKeeper.value = data["charityOrderMainBookKeeper"]
@@ -417,7 +564,7 @@ export async function hideCreateButton(sender: Layout, e: IEventArgs) {
         return currentLocation.includes(element)
       }
     
-    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)) {
+    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)||currentLocation.includes('CardView')) {
         $('.new-card').css('display', 'none')
     } else {
         $('.new-card').css('display', 'inline-block')

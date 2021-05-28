@@ -795,12 +795,19 @@ export async function prepFillAgreementContract(sender: AgreementList) {
 
     console.log(headerInfo);
 
-    let advicerHeader = `\n\n Советник по вопросам безопасности ${fioSDL}: «Сведения и документы о клиенте, предоставителе клиента, выгодоприобретателе, бенефициарном владельце в соответствии с Правилами внутреннего контроля получены ${dateSDL}»`
-    let bossReadHeader = `\n\n Руководитель подразделения, исполняющего договор ${fioReadTask} с проектом договора ознакомлен ${dateReadTask}`
+    let advicerHeader = `\n\nСоветник по вопросам безопасности ${fioSDL}: «Сведения и документы о клиенте, предоставителе клиента, выгодоприобретателе, бенефициарном владельце в соответствии с Правилами внутреннего контроля получены ${dateSDL}»`
+    
+
+
+    let bossReadHeader = `\n\nРуководитель подразделения, исполняющего договор ${fioReadTask} с проектом договора ознакомлен ${dateReadTask}`
     let agreementList = sender.layout.controls.agreementList
 
     let docTypeControl = sender.layout.controls.directoryDesignerRow2
     let docType = docTypeControl.params.value == null ? "" : docTypeControl.params.value.name
+
+    if (docType=="Соглашение о конфиденциальности") {
+        advicerHeader = ''
+    }
     let docTypeNumControl = sender.layout.controls.regNumber
     let docTypeNum = (docTypeNumControl.params.value) == null ? "" : docTypeNumControl.params.value.number
     docType += docTypeNum == "" ? '' : " № " + docTypeNum

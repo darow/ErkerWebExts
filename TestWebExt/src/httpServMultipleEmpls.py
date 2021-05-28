@@ -12,8 +12,9 @@ hostPort = 8002
 
 class MyServer(BaseHTTPRequestHandler):
     def createCircleDiagsBlock(self, data):
-        html_text = '''<div id='circles' class="container-fluid">
-                        <div class="row d-flex justify-content-center">'''
+        # html_text = '''<div id='circles' class="container-fluid">
+        #                 <div class="row d-flex justify-content-center">'''
+        html_text = ''
         labels = 'Просрочено', 'Не просрочено'
         for employee in data:
             notExpiredCount = int(employee['taskCount']) - int(employee['expiredCount'])
@@ -29,8 +30,8 @@ class MyServer(BaseHTTPRequestHandler):
             with open('temp.html', 'r') as g:
                 htmlDate = g.read()
 
-            html_text += '''<div class="col-xxl-4 col-xl-6 col-12 text-center pb-5">
-                    <h3 class = ''>%s</h3>
+            html_text += '''<div class="col-xxl-6 col-12 text-center pb-5">
+                    <h3 class = 'empl-name'>%s</h3>
                     <div>%s</div>
                     <div>Всего: %s</div>
                     <div>Просрочено: %s</div>
@@ -41,13 +42,13 @@ class MyServer(BaseHTTPRequestHandler):
                 employee['taskCount'],
                 employee['expiredCount'],
                 str(notExpiredCount))            
-        html_text += "</div></div>"
+        # html_text += "</div></div>"
         return html_text
 
     def createBarsDiagsBlock(self, data):
-        html_text = '''<div id='bars' class="container-fluid d-none">
-                        <div class="row d-flex justify-content-center">'''
-             
+        # html_text = '''<div id='bars' class="container-fluid d-none">
+        #                 <div class="row d-flex justify-content-center">'''
+        html_text = ''             
         for employee in data:
             n_groups = 1
             labels = (employee['fio'])
@@ -80,8 +81,8 @@ class MyServer(BaseHTTPRequestHandler):
 
             notExpiredCount = int(employee['taskCount']) - int(employee['expiredCount'])
             html_text += '''
-                <div class="col-xxl-4 col-xl-6 col-12 text-center pb-5">
-                    <h3 class = ''>%s</h3>
+                <div class="col-xxl-6 col-12 text-center pb-5">
+                    <h3 class = 'empl-name'>%s</h3>
                     <div>%s</div>
                     <div>Всего: %s</div>
                     <div>Просрочено: %s</div>
@@ -95,14 +96,18 @@ class MyServer(BaseHTTPRequestHandler):
                 employee['expiredCount'],
                 str(notExpiredCount))        
 
-        html_text += "</div></div>"
+        # html_text += "</div></div>"
         return html_text
     
     def createTasksCountPerDayBlock(self, data):
-        html_text = '''<div id='tasksPerDay' class="container-fluid d-none">
-                        <div class="row d-flex justify-content-center">'''
+        # html_text = '''<div id='tasksPerDay' class="container-fluid d-none">
+        #                 <div class="row d-flex justify-content-center">'''
+        html_text = ''
         for employee in data:
-            fig, ax = plt.subplots(figsize=(15,8))
+            if len(data) == 1:
+                fig, ax = plt.subplots()
+            else:
+                fig, ax = plt.subplots(figsize=(15,8))
             dates = [datetime.datetime.strptime(tmp['date'].split('T')[0], "%Y-%m-%d").date() for tmp in employee['emplTasksPerDayCount']]
             tasksCounts = [tmp['count'] for tmp in employee['emplTasksPerDayCount']]
             totalTasksCounts = []
@@ -122,18 +127,18 @@ class MyServer(BaseHTTPRequestHandler):
             label='За день')
             
             plt.legend()
-            plt.xticks(rotation=45)
+            plt.xticks(rotation=20)
             plt.savefig("temp.html", format="svg")
             with open('temp.html', 'r') as g:
                 htmlDate = g.read()
 
-            html_text += '''<div class="col-12 text-center pb-5">
-                    <h3 class = ''>%s</h3>
+            html_text += '''<div class="tasks-count-column col-12 text-center pb-5">
+                    <h3 class = 'empl-name'>%s</h3>
                     <div>%s</div>
                     
                 </div>''' %(employee['fio'],
                 htmlDate)            
-        html_text += "</div></div>"
+        # html_text += "</div></div>"
         return html_text
 
     def do_GET(self):
@@ -147,6 +152,7 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
+                # print('''asda'''%data[0]['fio'])
                 self.wfile.write(bytes('''<html>
                 <meta charset = "utf-8"/>
                 <head>
@@ -196,22 +202,61 @@ class MyServer(BaseHTTPRequestHandler):
                 </head>
                 <body>
                     <div class = "text-center pb-5">
-                        <h2>Отчет производительности</h2>
+                        <h2 class='mb-2'>Отчет производительности</h2>
+                        <h3 id='oneEmplName' class='mb-3 d-none'>%s</h3>
+                        <div id = "btnsPanel">
                         <button type="button" id="circleBtn" class="btn btn-outline-info" onClick='showCircles()'>Круговые диаграммы</button>
                         <button type="button" id="barsBtn" class="btn btn-outline-secondary" onClick='showBars()'>Столбцы</button>
                         <button type="button" id="tasksPerDayBtn" class="btn btn-outline-secondary" onClick='showTasksPerDay()'>Выполненные задачи по дням</button>
-                    </div>''', "utf-8"))  
+                        </div>
+                    </div>'''%(data[0]['fio']), "utf-8"))  
 
+                if len(data) == 1:
+                    self.wfile.write(bytes('''<div class="container-fluid">
+                            <div class="row d-flex justify-content-center">''', "utf-8")) 
+                    circleDiagsBlock = self.createCircleDiagsBlock(data)
+                    self.wfile.write(bytes(circleDiagsBlock, "utf-8")) 
 
-                circleDiagsBlockt = self.createCircleDiagsBlock(data)
-                self.wfile.write(bytes(circleDiagsBlockt, "utf-8"))  
-               
-                barsDiagsBlock = self.createBarsDiagsBlock(data)
-                self.wfile.write(bytes(barsDiagsBlock, "utf-8"))
+                    tasksCountPerDayBlock = self.createTasksCountPerDayBlock(data)
+                    self.wfile.write(bytes(tasksCountPerDayBlock, "utf-8"))    
+                
+                    barsDiagsBlock = self.createBarsDiagsBlock(data)
+                    self.wfile.write(bytes(barsDiagsBlock, "utf-8"))
+                    
+                    self.wfile.write(bytes("</div></div>", "utf-8")) 
 
-                tasksCountPerDayBlock= self.createTasksCountPerDayBlock(data)
-                self.wfile.write(bytes(tasksCountPerDayBlock, "utf-8"))
-       
+                    self.wfile.write(bytes('''
+                        <script> 
+                            document.querySelector('#btnsPanel').classList.add('d-none');
+
+                            emplNames = document.querySelectorAll('.empl-name');
+                            [].forEach.call(emplNames, function(element, index, list) { 
+                                element.classList.add('d-none');
+                            });
+
+                            document.querySelector('.tasks-count-column').classList.add('col-xxl-6');
+                            document.querySelector('#oneEmplName').classList.remove('d-none');
+                            
+                        </script>''', "utf-8"))
+                else:
+                    circleDiagsBlock = '''<div id='circles' class="container-fluid">
+                            <div class="row d-flex justify-content-center">'''
+                    circleDiagsBlock += self.createCircleDiagsBlock(data)
+                    circleDiagsBlock += "</div></div>"
+                    self.wfile.write(bytes(circleDiagsBlock, "utf-8"))  
+                
+                    barsDiagsBlock = '''<div id='bars' class="container-fluid d-none">
+                            <div class="row d-flex justify-content-center">'''
+                    barsDiagsBlock += self.createBarsDiagsBlock(data)
+                    barsDiagsBlock += "</div></div>"
+                    self.wfile.write(bytes(barsDiagsBlock, "utf-8"))
+
+                    tasksCountPerDayBlock = '''<div id='tasksPerDay' class="container-fluid d-none">
+                            <div class="row d-flex justify-content-center">'''
+                    tasksCountPerDayBlock += self.createTasksCountPerDayBlock(data)
+                    tasksCountPerDayBlock += "</div></div>"
+                    self.wfile.write(bytes(tasksCountPerDayBlock, "utf-8"))
+
                 self.wfile.write(bytes("</body></html>", "utf-8"))
         
                 
