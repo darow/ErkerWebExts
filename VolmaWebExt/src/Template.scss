@@ -1,0 +1,72 @@
+﻿.text-center {
+    text-align: center !important;
+}
+
+.agreement-list-subtitle {
+    padding: 15px 0px 20px 0px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align:center;
+}
+
+.agreement-list-title {
+    font-weight: bold;
+    text-align:center;
+}
+
+.agreement-list-text {
+    line-height:1.2;
+}
+
+.font-weight-bold {
+    font-weight: bold;
+}
+
+.agreement-list-row-cell {
+    border: 1px solid black;
+}
+
+//УМЕНЬШЕНИЕ ТАБЛИЦЫ
+@media screen and (max-width: 680px) {
+  th.date {
+    width: 22% !important;
+    padding: 0px;
+    text-align: center !important;
+  }
+
+  th.comment {
+    width: 15% !important;
+    text-align: center !important;
+  }
+
+  th.corrections {
+    width: 10% !important;
+    text-align: center !important;
+  }
+
+  td>span, td>div>span, td>a>span, td>div>p {
+    font-size: 0.8em !important;
+  }
+
+  th.name {
+    width: 25% !important;
+    text-align: center !important;
+  }
+
+  th.decision {
+    width: 17% !important;
+    text-align: center !important;
+  }
+
+  td {
+    padding: 2px !important;
+  }
+}
+
+th.corrections {
+  display: none;
+}
+
+td.docs-corrections {
+  display: none;
+}

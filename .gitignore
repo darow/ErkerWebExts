@@ -1,6 +1,11 @@
 ﻿/**
 !/.gitignore
 
+!/VolmaWebExt/
+/VolmaWebExt/**
+!/VolmaWebExt/src
+!/VolmaWebExt/src/*
+
 !/GAZPCadrWebExt/
 /GAZPCadrWebExt/**
 !/GAZPCadrWebExt/src
