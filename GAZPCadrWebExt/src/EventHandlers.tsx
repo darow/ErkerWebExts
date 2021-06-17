@@ -14,6 +14,43 @@ import { LayoutControl } from "@docsvision/webclient/System/BaseControl";
 import { $CardId } from "@docsvision/webclient/System/LayoutServices";
 
 
+export async function showCandidateCtrls(sender){
+    let controls = sender.layout.controls
+    let acceptOrTranslate = controls.acceptOrTranslate
+    let candidateBlock = controls.candidateBlock
+    let candidateSurnameBlock = controls.candidateSurnameBlock
+    let candadateNameBlock = controls.candadateNameBlock
+    let candidatePatronymicBlock = controls.candidatePatronymicBlock
+    let employeeBlock = controls.employeeBlock
+
+    let acceptOrTranslateValue = acceptOrTranslate.params.value
+    if(acceptOrTranslateValue== 'Перевод' || acceptOrTranslateValue== 'Увольнение'){
+        candidateBlock.params.visibility = false
+        employeeBlock.params.visibility = true
+        candidateSurnameBlock.params.visibility = false
+        candadateNameBlock.params.visibility = false
+        candidatePatronymicBlock.params.visibility = false
+    } else {
+        candidateBlock.params.visibility = true
+        employeeBlock.params.visibility = false
+        candidateSurnameBlock.params.visibility = true
+        candadateNameBlock.params.visibility = true
+        candidatePatronymicBlock.params.visibility = true
+    }
+}
+
+
+export async function fillCuratorTask(sender) {
+    console.log('fillCuratorTask')
+
+    let docNameCtrl = sender.layout.controls.taskName
+    let descriptionCtrl = sender.layout.controls.description
+    docNameCtrl.params.value = "Подготовьте трудовой договор и приказ о приеме на работу."
+    descriptionCtrl.params.value = `Подготовьте трудовой договор и приказ о приеме на работу.
+    Подготовьте оценочный лист и отправьте руководителю подразделения (филиала) в которое принимается (переводится) сотрудник, далее в ОТиЗ.`
+}
+
+
 export function clearComment(sender: LayoutControl, e: CancelableEventArgs<any>) {
     let cardId = sender.layout.getService($CardId);
     let requestManager = sender.layout.getService($RequestManager);
@@ -23,13 +60,15 @@ export function clearComment(sender: LayoutControl, e: CancelableEventArgs<any>)
     console.log(e);
 
     const commentInModal = e.data.layout.childControls[0].childControls[1].childControls[0].childControls[0];
-    
+    let OtchetKandidatCtrl = sender.layout.controls.OtchetKandidat
+
     if(e.data.operationData.additionalInfo.decisionName === "Отказано"){
-        e.wait()
-        comment.params.value = "_"
-        comment.save()
-        commentInModal.params.value = "_"
-        e.accept()
+        // e.wait()
+        // OtchetKandidatCtrl.params.value = ''
+        // comment.params.value = ""
+        commentInModal.params.required = false
+        commentInModal.params.value = ""
+        // e.accept()
     }    
     console.log("Работает 3");  
 }
@@ -536,7 +575,8 @@ export function UpdateCandidateFIO(sender: Layout, e: IEventArgs) {
 export async function hideCreateButton(sender: Layout, e: IEventArgs) {
     console.log("hideCreateButton")
     
-    const foldersWithoutCreateButton = { "Главная":"/Dashboard",
+    const foldersWithoutCreateButton = { 
+        "Главная":"/Dashboard",
         "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
         "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
         "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
@@ -555,6 +595,83 @@ export async function hideCreateButton(sender: Layout, e: IEventArgs) {
         "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
         "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
         "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
+        "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
+        "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
+        "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
+        "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
+        "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
+        "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
+        "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
+        "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
+        "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
+        "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
+    }
+
+    let currentLocation = window.location.href
+
+    function isSliceOfCurrentLocation(element, index, array) {
+
+        return currentLocation.includes(element)
+      }
+    
+    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)||currentLocation.includes('CardView')) {
+        $('.new-card').css('display', 'none')
+    } else {
+        $('.new-card').css('display', 'inline-block')
+    }
+}
+
+
+export async function hideCreateButtonRev(sender: Layout, e: IEventArgs) {
+    console.log("hideCreateButtonRev")
+    
+    const fileUrl = './file.txt' // provide file location
+
+    fetch(fileUrl)
+        .then( r => r.text() )
+        .then( t => console.log(t) )
+
+    var txt = '';
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function(){
+    if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
+        txt = xmlhttp.responseText;
+
+    }
+    };
+    xmlhttp.open("GET","file.txt",true);
+    xmlhttp.send();
+
+    const foldersWithoutCreateButton = { 
+        "Главная":"/Dashboard",
+        "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
+        "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
+        "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
+        "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
+        "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
+        "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
+        "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
+        "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
+        "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
+        "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
+        "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
+        "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
+        "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
+        "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
+        "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
+        "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
+        "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
+        "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
+        "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
+        "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
+        "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
+        "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
+        "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
+        "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
+        "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
+        "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
+        "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
+        "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
     }
 
     let currentLocation = window.location.href

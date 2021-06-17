@@ -18,10 +18,26 @@ import { ICancelableEventArgs } from "@docsvision/webclient/System/ICancelableEv
 import { Links } from "@docsvision/webclient/BackOffice/Links";
 
 
-export async function newFunc(sender: Layout) {
+
+
+export async function tryReadFile(sender: Layout) {
     console.log("newFunc");
+
+    var fr=new FileReader();
+    fr.onload=function(){
+        console.log(fr.result);
+    }
+        
+    console.log(fr.readAsText(this.files[0]));
 }
 
+
+
+export async function newFunc(sender: Layout) {
+    console.log("newFunc");
+
+
+}
 
 
 export async function checkRegNum(urlResolver: UrlResolver,
