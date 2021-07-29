@@ -1,4 +1,47 @@
-﻿import {IEventArgs} from "@docsvision/webclient/System/IEventArgs";
+﻿const foldersWithCreateButton = { 
+    "УПЦ/Карточки согласования кандидатов":"/Folder/56f3755b-d4ac-4285-87c1-37d4e9af931d",
+    "УПЦ/Согласование кандидатов для прохождения практики":"/Folder/adf95f2b-49e5-4fce-bd43-3dd81fce42f0", 
+    "ОУиОТО/г.Краснодар/Карточки докумнетов кандидатов":"/Folder/8793a4e8-c30e-4dc5-aa18-0eb993f186bc",
+    "ОСР/Администрация/01":"/Folder/cddcb73b-02b9-453c-b1c4-54a1dcefc68c", 
+    "ОСР/Администрация/02":"/Folder/b4d6c4e2-900a-4982-9f84-804be11eb488",
+    "ОСР/Администрация/03":"/Folder/48700c94-65b0-4af2-8787-ffb429f469d1", 
+    "ОСР/Вуктыльское ГПУ/01":"/Folder/79efbde6-0239-4d8b-ac6a-4c98860305e7",
+    "ОСР/Вуктыльское ГПУ/02":"/Folder/b5ac4bb1-9490-4ac0-a035-70f4b1da4ca8", 
+    "ОСР/ИТЦ/01":"/Folder/1f3a6b90-cc85-4ce4-8581-4488004b5218",
+    "ОСР/ИТЦ/02":"/Folder/7da0f777-26f6-4410-97aa-c4e4fba2082d", 
+    "ОСР/Каневское ГПУ/01":"/Folder/037ab8af-abb5-4d0e-afae-45f5e0d38f3e",
+    "ОСР/Каневское ГПУ/02":"/Folder/a29db86d-4c0e-4a4a-86ac-273389c63ac3", 
+    "ОСР/ЛПУМТ/01":"/Folder/149d7b53-b9b2-45b2-a7d7-c690aa92a9f2",
+    "ОСР/ЛПУМТ/02":"/Folder/6e74b359-3158-4c45-b197-783d9649428f", 
+    "ОСР/Светлогратское ГПУ/01":"c760d9b4c62f",
+    "ОСР/Светлогратское ГПУ/02":"a68c0f83f48b", 
+    "ОСР/СКЗ/01":"1a89c1c204ed",
+    "ОСР/СКЗ/02":"94b7d448db54", 
+    "ОСР/УАВР/01":"2abd78e82819",
+    "ОСР/УАВР/02":"0c6d4e249a14", 
+    "ОСР/УМТСиК/01":"24a2c6e9d320",
+    "ОСР/УМТСиК/02":"cdaef6a66e21", 
+    "ОСР/УТТиСТ/01":"418ef822208d",
+    "ОСР/УТТиСТ/02":"5bd743175d6c", 
+    "ОСР/04.Личные дела/Администрация":"d9c216987143",  
+}
+
+
+const foldersWithCreateOrderButton = { 
+    "ОСР/Администрация/Заявления на выплату":"54a1dcefc68c",
+    "ОСР/Вуктыльское ГПУ/01":"/Folder/79efbde6-0239-4d8b-ac6a-4c98860305e7",
+    "ОСР/ИТЦ/01":"/Folder/1f3a6b90-cc85-4ce4-8581-4488004b5218",
+    "ОСР/Каневское ГПУ/01":"/Folder/037ab8af-abb5-4d0e-afae-45f5e0d38f3e",
+    "ОСР/ЛПУМТ/01":"/Folder/149d7b53-b9b2-45b2-a7d7-c690aa92a9f2",
+    "ОСР/Светлогратское ГПУ/01":"c760d9b4c62f",
+    "ОСР/СКЗ/01":"1a89c1c204ed",
+    "ОСР/УАВР/01":"2abd78e82819",
+    "ОСР/УМТСиК/01":"24a2c6e9d320",
+    "ОСР/УТТиСТ/01":"418ef822208d",
+}
+
+
+import {IEventArgs} from "@docsvision/webclient/System/IEventArgs";
 import {Layout} from "@docsvision/webclient/System/Layout";
 import {IDataChangedEventArgs} from "@docsvision/webclient/System/IDataChangedEventArgs";
 import {NumberControl} from "@docsvision/webclient/Platform/Number";
@@ -12,6 +55,25 @@ import { $Router } from "@docsvision/webclient/System/$Router";
 import { CancelableEventArgs } from "@docsvision/webclient/System/CancelableEventArgs";
 import { LayoutControl } from "@docsvision/webclient/System/BaseControl";
 import { $CardId } from "@docsvision/webclient/System/LayoutServices";
+
+
+export async function showCreateOrderBtn(sender){
+    console.log("showCreateOrderBtn")
+
+    let currentLocation = window.location.href
+    let createOrderBtn = sender.layout.controls.createOrderButton
+    function isSliceOfCurrentLocation(element, index, array) {
+        return currentLocation.includes(element)
+      }
+    
+    if (Object.values(foldersWithCreateOrderButton).find(isSliceOfCurrentLocation)) {
+        createOrderBtn.params.visibility = true
+        // $('.new-card').css('display', 'inline-block')
+    } else {
+        createOrderBtn.params.visibility = false
+        // $('.new-card').css('display', 'none')
+    }
+}
 
 
 export async function showCandidateCtrls(sender){
@@ -200,6 +262,7 @@ export async function addLinksToCard1(sender){
         let urlResolver = sender.layout.getService($UrlResolver);
         let requestManager = sender.layout.getService($RequestManager);
         let cards = JSON.parse(localStorage.getItem('cardIds'))
+        console.log(cards)
         let length = cards.length
         let parentCardId = sender.layout.cardInfo.id;
 
@@ -575,37 +638,37 @@ export function UpdateCandidateFIO(sender: Layout, e: IEventArgs) {
 export async function hideCreateButton(sender: Layout, e: IEventArgs) {
     console.log("hideCreateButton")
     
-    const foldersWithoutCreateButton = { 
-        "Главная":"/Dashboard",
-        "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
-        "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
-        "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
-        "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
-        "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
-        "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
-        "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
-        "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
-        "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
-        "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
-        "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
-        "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
-        "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
-        "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
-        "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
-        "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
-        "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
-        "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
-        "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
-        "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
-        "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
-        "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
-        "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
-        "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
-        "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
-        "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
-        "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
-        "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
-    }
+    // const foldersWithoutCreateButton = { 
+    //     "Главная":"/Dashboard",
+    //     "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
+    //     "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
+    //     "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
+    //     "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
+    //     "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
+    //     "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
+    //     "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
+    //     "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
+    //     "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
+    //     "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
+    //     "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
+    //     "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
+    //     "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
+    //     "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
+    //     "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
+    //     "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
+    //     "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
+    //     "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
+    //     "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
+    //     "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
+    //     "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
+    //     "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
+    //     "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
+    //     "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
+    //     "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
+    //     "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
+    //     "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
+    //     "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
+    // }
 
     let currentLocation = window.location.href
 
@@ -614,76 +677,78 @@ export async function hideCreateButton(sender: Layout, e: IEventArgs) {
         return currentLocation.includes(element)
       }
     
-    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)||currentLocation.includes('CardView')) {
-        $('.new-card').css('display', 'none')
-    } else {
+    if (Object.values(foldersWithCreateButton).find(isSliceOfCurrentLocation)) {
         $('.new-card').css('display', 'inline-block')
+    } else {
+        $('.new-card').css('display', 'none')
     }
 }
 
 
-export async function hideCreateButtonRev(sender: Layout, e: IEventArgs) {
-    console.log("hideCreateButtonRev")
+// export async function hideCreateButtonRev(sender: Layout, e: IEventArgs) {
+//     console.log("hideCreateButtonRev")
     
-    const fileUrl = './file.txt' // provide file location
-
-    fetch(fileUrl)
-        .then( r => r.text() )
-        .then( t => console.log(t) )
-
-    var txt = '';
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function(){
-    if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
-        txt = xmlhttp.responseText;
-
-    }
-    };
-    xmlhttp.open("GET","file.txt",true);
-    xmlhttp.send();
-
-    const foldersWithoutCreateButton = { 
-        "Главная":"/Dashboard",
-        "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
-        "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
-        "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
-        "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
-        "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
-        "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
-        "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
-        "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
-        "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
-        "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
-        "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
-        "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
-        "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
-        "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
-        "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
-        "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
-        "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
-        "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
-        "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
-        "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
-        "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
-        "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
-        "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
-        "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
-        "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
-        "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
-        "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
-        "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
-    }
-
-    let currentLocation = window.location.href
-
-    function isSliceOfCurrentLocation(element, index, array) {
-
-        return currentLocation.includes(element)
-      }
+//     console.log(foldersWithoutCreateButton1)
     
-    if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)||currentLocation.includes('CardView')) {
-        $('.new-card').css('display', 'none')
-    } else {
-        $('.new-card').css('display', 'inline-block')
-    }
-}
+//     const fileUrl = './file.txt' // provide file location
+
+//     fetch(fileUrl)
+//         .then( r => r.text() )
+//         .then( t => console.log(t) )
+
+//     var txt = '';
+//     var xmlhttp = new XMLHttpRequest();
+//     xmlhttp.onreadystatechange = function(){
+//     if(xmlhttp.status == 200 && xmlhttp.readyState == 4){
+//         txt = xmlhttp.responseText;
+
+//     }
+//     };
+//     xmlhttp.open("GET","file.txt",true);
+//     xmlhttp.send();
+
+//     const foldersWithoutCreateButton = { 
+//         "Главная":"/Dashboard",
+//         "УПЦ":"/Folder/9b28e172-0ba3-42b2-a083-58fb76bb5e0e", 
+//         "Резерв":"/Folder/af7eeb05-2daf-4927-9496-bc7849d1d16f",
+//         "ОУиОТО":"/Folder/d1d1cb50-7594-431c-82f0-000ea44d225f", 
+//         "ОУиОТО(г.Краснодар)":"/Folder/cb70f261-d442-4c80-8f66-2857f15ce1fd",
+//         "ОУиОТО(ст.Каневская)":"/Folder/76f8d460-2420-4bb4-bc3d-9752b3590092", 
+//         "ОУиОТО(Вуктыльское ГПУ)":"/Folder/a448e45b-edda-4754-96f7-d79e0208c3fb",
+//         "ОУиОТО(ЛПУМТ)":"/Folder/f06b7e1b-87c9-42d7-a3cd-e8c16195246a", 
+//         "ОСР":"/Folder/be5ce7f4-5dc8-4b69-9599-09302c41dba9",
+//         "Администрация":"/Folder/dd18f1d3-4c77-43b3-acfc-d603147e0b99", 
+//         "Вуктыльское ГПУ":"/Folder/6f71e996-2c6b-4eff-8e81-1d3b632957d5",
+//         "ИТЦ":"/Folder/50ab5ca1-dbca-4bcd-baf0-669a7936e9b2", 
+//         "Каневское ГПУ":"/Folder/aaf608a4-5756-4680-bf2a-38d2d0e44d42",
+//         "ЛПУМТ":"/Folder/dcfff06e-0bdb-41c2-8e14-156f5cfec2ee", 
+//         "Светлоградское ГПУ":"/Folder/0fafe4d9-7f67-45de-8d32-9bed8cc060eb",
+//         "СКЗ":"/Folder/3fc4b66d-5bbf-4f2d-b644-0cd7d3d697c8", 
+//         "УАВР":"/Folder/88830e4c-10fd-428b-a8e3-ac7b53b025e5",
+//         "УМТСиК":"/Folder/7e3b329c-7c47-4115-8d9e-2213c16934f9", 
+//         "УТТиСТ":"/Folder/b771e21f-1924-4054-93e2-e98cf23e846a",
+//         "Входящие":"/Folder/5bf0fb94-23fa-4212-80c3-c598e9859901",
+//         "В работе":"/Folder/658af190-d102-406a-9869-581405a9cbb4", 
+//         "На контроле":"/Folder/1b1f4bce-b3e6-42fe-a1e5-e64aadbe8479",
+//         "Ответственное исполнение":"/Folder/778646ed-2625-4ce8-9386-b0e720fa1abe", 
+//         "Исходящие":"/Folder/93deb151-eeca-4591-b0fc-94a7c5833794",
+//         "Делегировано":"/Folder/27a8f99f-6cd8-47aa-9e19-205c8e0039b3", 
+//         "Завершено":"/Folder/ecd3e0a0-7da4-4d47-83a9-809f6137b548",
+//         "Поиск заданий":"/Folder/01edd5ee-73db-4c8b-b62c-50bd4c498ef7", 
+//         "Входящие(поиск)":"/Folder/6b69a304-add2-458c-ac02-6e059e451bcd",
+//         "Исходящие(поиск)":"/Folder/43a36416-2c8a-4edf-9d59-43c25ab96e60", 
+//     }
+
+//     let currentLocation = window.location.href
+
+//     function isSliceOfCurrentLocation(element, index, array) {
+
+//         return currentLocation.includes(element)
+//       }
+    
+//     if (Object.values(foldersWithoutCreateButton).find(isSliceOfCurrentLocation)||currentLocation.includes('CardView')) {
+//         $('.new-card').css('display', 'none')
+//     } else {
+//         $('.new-card').css('display', 'inline-block')
+//     }
+// }
