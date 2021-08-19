@@ -204,7 +204,7 @@ export async function clearCmntOnCancel(sender: Layout, args: CancelableEventArg
 
 
 export async function createFakeAgrBtn(sender){
-    console.log('changeCandAgrmnt')
+    console.log('createFakeAgrBtn')
 
     let fakeBtn = document.createElement('button')
     fakeBtn.classList.add('fake-agreement-btn')
@@ -266,9 +266,13 @@ export async function addLinksToCard1(sender){
         let length = cards.length
         let parentCardId = sender.layout.cardInfo.id;
 
+        let timestamp
+        let childrenCardId
+
         for(let i=0; i< length; i++) {
-            let timestamp = sender.layout.cardInfo.timestamp;
-            let childrenCardId = cards[i]
+            timestamp = sender.layout.cardInfo.timestamp;
+            childrenCardId = cards[i]
+            console.log(childrenCardId)
             await addLinkToLinks1(urlResolver, requestManager, childrenCardId, parentCardId,
                  timestamp).then((data: string) => {
                     console.log(data)
@@ -280,6 +284,7 @@ export async function addLinksToCard1(sender){
         }
         console.log("1233")
     }
+    
     console.log('Начало')
     localStorage.removeItem('cardIds')
     localStorage.getItem('cardIds')
@@ -307,12 +312,14 @@ export async function addLinkToLinks1(urlResolver: UrlResolver, requestManager: 
             fieldAlias: "ReferenceList"
         }
     }
-    return requestManager.post(url, JSON.stringify(postdata))
+    let pd = JSON.stringify(postdata)
+    // setTimeout(console.log(pd), 1500)
+    return await requestManager.post(url, pd)
 }
 
 
 export async function createNewOrder1(sender){
-    console.log("createNewOrder");
+    console.log("createNewOrder1");
 
     let inputs = document.getElementsByTagName('input')
     let tr = document.getElementsByClassName('system-grid-data-row')
@@ -512,10 +519,11 @@ export async function fillAgreementAndBookKeepers(sender: Layout, e:IEventArgs) 
                 if (data['recruitmentDocsOUandOTOBoss']) {
                     controls.OUandOTOChief.value = data['recruitmentDocsOUandOTOBoss']
                 }
-                if ((data['recruitmentDocsAgreementEmployees1'])&&(data['recruitmentDocsHeadOfDepartment'])) {
-                    let agreementArr = [data['recruitmentDocsHeadOfDepartment']]
+                if ((data['recruitmentDocsAgreementEmployees1'])||(data['recruitmentDocsHeadOfDepartment'])) {
+                    let agreementArr = data['recruitmentDocsAgreementEmployees1']
                     if ((controls.acceptOrTranslate.value == "Перевод")||(controls.acceptOrTranslate.value == "Приём"))
-                        agreementArr = agreementArr.concat(data['recruitmentDocsAgreementEmployees1'])
+                        if (data['recruitmentDocsHeadOfDepartment'])
+                            agreementArr = agreementArr.concat([data['recruitmentDocsHeadOfDepartment']])
                     controls.coordinatingPersons.value = agreementArr
                 }
                 if (data['recruitmentDocsAgreementEmployees2']) {

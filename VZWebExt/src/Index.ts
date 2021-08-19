@@ -1,4 +1,4 @@
-﻿import * as EventHandlers from "./EventHandlers";
+﻿import * as EventHandlers from "./VZWebExt";
 import { extensionManager } from "@docsvision/webclient/System/ExtensionManager";
 
 

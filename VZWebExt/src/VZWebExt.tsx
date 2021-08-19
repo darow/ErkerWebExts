@@ -16,6 +16,17 @@ export async function newFunc(sender:Layout) {
 }
 
 
+export async function disableCheckBoxes(sender:Layout) {
+    console.log("disableCheckBoxes")
+
+    if ($("span:contains('МеткаНаСогласованиеСкрытьЧекбоксыВделегировании')").length||
+    $("span:contains('МеткаНаСогласованиеСкрытьЧекбоксыВТиповойПоставкеХорека')").length) {
+        sender.layout.controls.banCheckBox.params.visibility = false
+        sender.layout.controls.returnCheckBox.params.visibility = false
+    } 
+}
+
+
 export async function setDefaultVals(sender:Layout) {
     console.log("setDefaultVals");
 

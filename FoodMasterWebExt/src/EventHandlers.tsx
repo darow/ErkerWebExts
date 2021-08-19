@@ -5,6 +5,29 @@ import { $UrlResolver } from "@docsvision/webclient/System/$UrlResolver";
 import { UrlResolver } from "@docsvision/webclient/System/UrlResolver";
 import { $RequestManager, IRequestManager } from "@docsvision/webclient/System/$RequestManager";
 import { AgreementList } from "@docsvision/webclient/Approval/AgreementList";
+import {MessageBox} from "@docsvision/webclient/Helpers/MessageBox/MessageBox";
+
+
+export async function checkSigners(sender: AgreementList, e: IEventArgs) {
+    console.log("checkSigners")
+
+    let controls = sender.layout.controls
+    let empls1 = controls.approvers.params.value
+    let empls2 = controls.signers.params.value
+    for (let i = 0; i < empls1.length; i++){
+        for (let j = 0; j < empls2.length; j++) {
+            console.log(empls1[i].id, empls2[j].id, empls1[i].id == empls2[j].id)
+            if (empls1[i].id == empls2[j].id) {
+                empls1.splice(i,1)
+                controls.approvers.params.value = empls1
+                empls2.splice(j,1)
+                controls.signers.params.value = empls2
+                MessageBox.ShowWarning("Согласующий не может быть подписантом.")
+                return
+            }
+        }
+    }
+}
 
 
 // let cardId = layoutManager.cardLayout.getService($CardId);
